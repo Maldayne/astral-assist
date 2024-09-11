@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "esnext",
     "useDefineForClassFields": true,
-    "module": "Node16",
-    "moduleResolution": "Node16",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
     "strict": true,
     "jsx": "preserve",
     "sourceMap": true,
