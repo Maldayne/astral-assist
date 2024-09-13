@@ -13,13 +13,21 @@
     "allowJs": true,
     "lib": ["ESNext", "DOM"],
     "skipLibCheck": true,
+    "types": ["vite/client", "vue"],
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue", "vite.config.ts"],
+  "include": [
+    "src/**/*.ts", 
+    "src/**/*.d.ts", 
+    "src/**/*.tsx", 
+    "src/**/*.vue", 
+    "vite.config.ts", 
+    "src/components/ui/**/*.{ts,tsx,vue}"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
