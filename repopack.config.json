@@ -1,0 +1,72 @@
+{
+  "output": {
+    "filePath": "code.txt",
+    "style": "plain",
+    "headerText": "Astral Assist Project Code",
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "showLineNumbers": false,
+    "topFilesLength": 10,
+    "instructionFilePath": "repopack-ai-instructions.md"
+  },
+  "include": [
+    "src/**/*",
+    "public/**/*",
+    "src-tauri/**/*",
+    "prisma/**/*",
+    "*.json",
+    "*.js",
+    "*.ts",
+    "*.md",
+    "*.css"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "node_modules",
+      "dist",
+      ".vscode",
+      ".idea",
+      "*.log",
+      "*.lock",
+      "src-tauri/target",
+      "src-tauri/icons",
+      "src-tauri/Cargo.lock",
+      ".DS_Store",
+      "*.svg",
+      "*.png",
+      "*.jpg",
+      "*.jpeg",
+      "*.gif",
+      "*.ico",
+      "*.woff",
+      "*.woff2",
+      "*.eot",
+      "*.ttf",
+      "*.otf",
+      "*.map",
+      "*.d.ts",
+      "tsconfig.tsbuildinfo",
+      "tsconfig.node.tsbuildinfo",
+      ".env",
+      ".env.*",
+      "!.env.example",
+      "coverage",
+      "*.test.ts",
+      "*.spec.ts",
+      "__tests__",
+      "__mocks__",
+      ".github",
+      ".husky",
+      ".eslintcache",
+      ".stylelintcache",
+      "*.tsbuildinfo",
+      "repopack-output.xml",
+      "code.txt"
+    ]
+  },
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
