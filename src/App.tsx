@@ -10,7 +10,7 @@ export default defineComponent({
     })
 
     return () => (
-      <div class="app dark:bg-gray-900 dark:text-white min-h-screen">
+      <div class="app dark:bg-gray-900 dark:text-white min-h-screen min-w-screen">
         <RouterView />
       </div>
     )
