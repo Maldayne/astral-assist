@@ -51,6 +51,7 @@ export default defineComponent({
         opts={{
           align: "start",
           loop: false,
+          dragFree: true,
         }}
         class="w-full"
         onCreateCarousel={(carouselApi: CarouselApi) => {
@@ -63,7 +64,7 @@ export default defineComponent({
           }
         }}
       >
-        <CarouselContent class="flex-auto justify-center">
+        <CarouselContent class="flex-auto justify-center overflow">
           {memoizedAssistants.value.map((assistant, index) => (
             <CarouselItem key={assistant.id} class="max-w-fit px-4">
               <AssistantCard
@@ -74,8 +75,8 @@ export default defineComponent({
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious class="left-2" />
+        <CarouselNext class="right-2" />
       </Carousel>
     )
   },

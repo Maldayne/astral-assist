@@ -1,4 +1,3 @@
-import { useAppStore } from "@/store/appStore"
 import { defineComponent, ref, watch } from "vue"
 import ChatHistory from "./ChatHistory"
 import ChatInput from "./ChatInput"
@@ -17,12 +16,11 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const appStore = useAppStore()
     const chatMessages = ref<ChatMessage[]>([])
 
     const sendMessage = (message: string) => {
       chatMessages.value.push({ role: "user", content: message })
-      // Mock response
+      // Mock response - replace with actual AI integration
       setTimeout(() => {
         chatMessages.value.push({
           role: "assistant",

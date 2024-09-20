@@ -34,8 +34,10 @@ export default defineComponent({
     return () => (
       <CardItem
         class={cn(
-          "cursor-pointer transition-all duration-300 w-32",
-          props.assistant.isActive ? "border-primary" : "hover:border-secondary"
+          "bg-transparent",
+          props.assistant.isActive
+            ? "border-primary mx-2"
+            : "hover:border-x-primary"
         )}
         onClick={() => props.onSelect(props.assistant.id)}
       >
@@ -44,11 +46,13 @@ export default defineComponent({
             <img
               src={props.assistant.avatar}
               alt={`${props.assistant.name}'s avatar`}
-              class="w-16 h-16 rounded-full mb-2 object-cover"
               onError={handleImageError}
             />
           ) : (
-            h(DefaultAIIcon, { size: 64, class: "mb-2" })
+            h(DefaultAIIcon, {
+              size: props.assistant.isActive ? 48 : 32,
+              class: "mb-2",
+            })
           )}
           <h3 class="text-sm font-medium text-center mb-1">
             {props.assistant.name}
