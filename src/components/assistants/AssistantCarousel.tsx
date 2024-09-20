@@ -4,10 +4,10 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
+  type CarouselApi,
 } from "@/components/ui/carousel"
 import { useAppStore } from "@/store/appStore"
-import { ChevronLeft, ChevronRight } from "lucide-vue-next"
-import { computed, defineComponent, onMounted, ref, watch } from "vue"
+import { computed, defineComponent, ref, watch } from "vue"
 import AssistantCard from "./AssistantCard"
 
 export default defineComponent({
@@ -17,28 +17,16 @@ export default defineComponent({
     const assistants = computed(() => appStore.currentAssistants)
     const activeAssistantId = computed(() => appStore.activeAssistantId)
 
-    const carouselRef = ref<HTMLElement | null>(null)
-    const currentIndex = ref(0)
+    const api = ref<CarouselApi>()
 
     const scrollToIndex = (index: number) => {
       console.log(`Attempting to scroll to index ${index}`)
-      if (carouselRef.value) {
-        const itemWidth = carouselRef.value.offsetWidth / 4 // Assuming 4 items visible
-        const scrollPosition = index * itemWidth
-        carouselRef.value.scrollTo({
-          left: scrollPosition,
-          behavior: "smooth",
-        })
-        console.log(`Scroll initiated to position: ${scrollPosition}`)
-      } else {
-        console.warn("Carousel element not available")
-      }
+      api.value?.scrollTo(index)
     }
 
     const handleAssistantSelect = (id: string, index: number) => {
       console.log(`Assistant selected: id=${id}, index=${index}`)
       appStore.setActiveAssistant(id)
-      currentIndex.value = index
       scrollToIndex(index)
     }
 
@@ -49,8 +37,6 @@ export default defineComponent({
       }))
     )
 
-    const showScrollButtons = computed(() => assistants.value.length > 4)
-
     watch(activeAssistantId, (newId) => {
       console.log(`Active assistant changed to: ${newId}`)
       const index = memoizedAssistants.value.findIndex((a) => a.id === newId)
@@ -60,61 +46,37 @@ export default defineComponent({
       }
     })
 
-    onMounted(() => {
-      console.log("Component mounted, carouselRef:", carouselRef.value)
-      // Initial scroll to active assistant
-      const initialIndex = memoizedAssistants.value.findIndex(
-        (a) => a.id === activeAssistantId.value
-      )
-      if (initialIndex !== -1) {
-        scrollToIndex(initialIndex)
-      }
-    })
-
     return () => (
-      <div class="relative w-full">
-        <Carousel class="w-full">
-          <CarouselContent ref={carouselRef}>
-            {memoizedAssistants.value.map((assistant, index) => (
-              <CarouselItem
-                key={assistant.id}
-                class="basis-1/4 sm:basis-1/4 md:basis-1/4 lg:basis-1/4 pl-4"
-              >
-                <AssistantCard
-                  assistant={assistant}
-                  isActive={assistant.isActive}
-                  onSelect={() => handleAssistantSelect(assistant.id, index)}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {showScrollButtons.value && (
-            <>
-              <CarouselPrevious
-                onClick={() =>
-                  scrollToIndex(Math.max(0, currentIndex.value - 1))
-                }
-                class="absolute left-0 top-1/2 transform -translate-y-1/2"
-              >
-                <ChevronLeft class="w-4 h-4" />
-              </CarouselPrevious>
-              <CarouselNext
-                onClick={() =>
-                  scrollToIndex(
-                    Math.min(
-                      memoizedAssistants.value.length - 1,
-                      currentIndex.value + 1
-                    )
-                  )
-                }
-                class="absolute right-0 top-1/2 transform -translate-y-1/2"
-              >
-                <ChevronRight class="w-4 h-4" />
-              </CarouselNext>
-            </>
-          )}
-        </Carousel>
-      </div>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: false,
+        }}
+        class="w-full"
+        onCreateCarousel={(carouselApi: CarouselApi) => {
+          api.value = carouselApi
+          const initialIndex = memoizedAssistants.value.findIndex(
+            (a) => a.id === activeAssistantId.value
+          )
+          if (initialIndex !== -1) {
+            scrollToIndex(initialIndex)
+          }
+        }}
+      >
+        <CarouselContent class="flex-auto justify-center">
+          {memoizedAssistants.value.map((assistant, index) => (
+            <CarouselItem key={assistant.id} class="max-w-fit px-4">
+              <AssistantCard
+                assistant={assistant}
+                isActive={assistant.isActive}
+                onSelect={() => handleAssistantSelect(assistant.id, index)}
+              />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
     )
   },
 })
