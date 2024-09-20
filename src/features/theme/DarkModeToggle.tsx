@@ -1,23 +1,31 @@
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
-import { defineComponent, ref, watch } from "vue"
+import { defineComponent, onMounted, ref, watch } from "vue"
 
 export default defineComponent({
   name: "DarkModeToggle",
   setup() {
-    const isDark = ref(true)
+    const isDark = ref(false)
 
-    const toggleDarkMode = () => {
-      isDark.value = !isDark.value
-      if (isDark.value) {
+    const updateDarkMode = (dark: boolean) => {
+      if (dark) {
         document.documentElement.classList.add("dark")
       } else {
         document.documentElement.classList.remove("dark")
       }
     }
 
-    watch(isDark, toggleDarkMode, { immediate: true })
+    const toggleDarkMode = () => {
+      isDark.value = !isDark.value
+      updateDarkMode(isDark.value)
+    }
+
+    onMounted(() => {
+      isDark.value = document.documentElement.classList.contains("dark")
+    })
+
+    watch(isDark, updateDarkMode)
 
     return () => (
       <div class="flex items-center space-x-2">

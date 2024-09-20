@@ -106,8 +106,10 @@
         "fullscreen": false,
         "height": 600,
         "resizable": true,
-        "title": "astral-assist",
-        "width": 800
+        "title": "Astral Assist",
+        "width": 800,
+        "decorations": true,
+        "transparent": true
       }
     ]
   }

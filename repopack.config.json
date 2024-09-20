@@ -1,7 +1,7 @@
 {
   "output": {
     "filePath": "code.txt",
-    "style": "plain",
+    "style": "xml",
     "headerText": "Astral Assist Project Code",
     "removeComments": false,
     "removeEmptyLines": false,

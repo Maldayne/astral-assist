@@ -1,4 +1,7 @@
 # Add patterns to ignore here, one per line
 # Example:
-# *.log
-# tmp/
+*.log
+tmp/
+.repopack.config.json
+.repopack-ai-instructions.xml
+.repopack-ai-instructions.md
