@@ -7,10 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependency directories
-node_modules/
-
-# Build outputs
+node_modules
 dist
 dist-ssr
 *.local
@@ -18,7 +15,6 @@ dist-ssr
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -27,36 +23,26 @@ dist-ssr
 *.sln
 *.sw?
 
+# Backend specific
+backend/node_modules
+backend/dist
+backend/.env
+
+# Tauri specific
+src-tauri/target
+src-tauri/icons
+src-tauri/Cargo.lock
+
 # Environment variables
 .env
 .env.*
 !.env.example
 
-# Tauri build files
-src-tauri/target/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# macOS
-.AppleDouble
-.LSOverride
-
-# Windows
-Thumbs.db
-ehthumbs.db
-
-# Rust
-**/*.rs.bk
-
-# Vite
-.vite/
-
-# Repopack files
-code.txt
+# AI and design specific
+code.xml
+repopack-ai-instructions.xml
+repopack-ai-instructions.md
+repopack-ai-prompt.xml
+repopack-ai-prompt.md
+design-document.xml
+design-document.md

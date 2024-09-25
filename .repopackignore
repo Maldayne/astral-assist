@@ -1,7 +1,25 @@
 # Add patterns to ignore here, one per line
+
 # Example:
-*.log
+
+\*.log
 tmp/
-.repopack.config.json
-.repopack-ai-instructions.xml
-.repopack-ai-instructions.md
+
+# shadcn-ui components
+
+src/components/ui/button/
+src/components/ui/carousel/
+src/components/ui/input/
+src/components/ui/label/
+src/components/ui/select/
+src/components/ui/switch/
+
+# repopack configs
+
+repopack.config.json
+repopack-ai-instructions.xml
+repopack-ai-instructions.md
+repopack-ai-prompt.xml
+repopack-ai-prompt.md
+design-document.xml
+design-document.md

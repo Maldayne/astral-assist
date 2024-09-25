@@ -1,13 +1,12 @@
 {
   "output": {
-    "filePath": "code.txt",
+    "filePath": "code.xml",
     "style": "xml",
     "headerText": "Astral Assist Project Code",
     "removeComments": false,
     "removeEmptyLines": false,
     "showLineNumbers": false,
-    "topFilesLength": 10,
-    "instructionFilePath": "repopack-ai-instructions.md"
+    "instructionFilePath": "repopack-ai-instructions.xml"
   },
   "include": [
     "src/**/*",
@@ -63,7 +62,13 @@
       ".stylelintcache",
       "*.tsbuildinfo",
       "repopack-output.xml",
-      "code.txt"
+      "code.xml",
+      "repopack-ai-prompt.md",
+      "repopack-ai-prompt.xml",
+      "design-document.md",
+      "design-document.xml",
+      "repopack-ai-instuctions.md",
+      "repopack-ai-instuctions.xml"
     ]
   },
   "security": {
