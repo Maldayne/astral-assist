@@ -1,11 +1,7 @@
-import { defineComponent, ref, watch } from "vue"
+import { useAppStore } from "@/store/appStore"
+import { defineComponent } from "vue"
 import ChatHistory from "./ChatHistory"
 import ChatInput from "./ChatInput"
-
-interface ChatMessage {
-  role: "user" | "assistant"
-  content: string
-}
 
 export default defineComponent({
   name: "ChatArea",
@@ -16,31 +12,20 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const chatMessages = ref<ChatMessage[]>([])
+    const appStore = useAppStore()
 
     const sendMessage = (message: string) => {
-      chatMessages.value.push({ role: "user", content: message })
-      // Mock response - replace with actual AI integration
-      setTimeout(() => {
-        chatMessages.value.push({
-          role: "assistant",
-          content: `Assistant ${props.assistantId} says: ${message}`,
-        })
-      }, 1000)
+      console.log("ChatArea - sendMessage:", message)
+      appStore.sendMessage(message)
     }
-
-    // Reset chat messages when assistant changes
-    watch(
-      () => props.assistantId,
-      () => {
-        chatMessages.value = []
-      }
-    )
 
     return () => (
       <div class="flex flex-col h-full">
-        <ChatHistory messages={chatMessages.value} />
-        <ChatInput onSendMessage={sendMessage} />
+        <ChatHistory
+          messages={appStore.currentChatMessages}
+          isLoading={appStore.isLoading}
+        />
+        <ChatInput onSendMessage={sendMessage} disabled={appStore.isLoading} />
       </div>
     )
   },

@@ -5,7 +5,7 @@ export default defineComponent({
   name: "ChatMessage",
   props: {
     role: {
-      type: String as () => "user" | "assistant",
+      type: String as () => "user" | "assistant" | "error" | "system",
       required: true,
     },
     content: {
@@ -14,6 +14,15 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const formatContent = (content: string) => {
+      return content.split("\n").map((line, index) => (
+        <span key={index}>
+          {line}
+          {index < content.split("\n").length - 1 && <br />}
+        </span>
+      ))
+    }
+
     return () => (
       <div
         class={cn(
@@ -23,13 +32,15 @@ export default defineComponent({
       >
         <div
           class={cn(
-            "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3",
+            "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 whitespace-pre-wrap",
             props.role === "user"
               ? "bg-blue-500 text-white"
-              : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+              : props.role === "assistant"
+                ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                : "bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100"
           )}
         >
-          {props.content}
+          {formatContent(props.content)}
         </div>
       </div>
     )

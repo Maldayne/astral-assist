@@ -1,3 +1,4 @@
+import { aiService, LowCreditError } from "@/modules/query/aiService"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 
@@ -12,6 +13,11 @@ interface AssistantGroup {
   id: string
   name: string
   assistants: Assistant[]
+}
+
+interface ChatMessage {
+  role: "user" | "assistant" | "error"
+  content: string
 }
 
 export const useAppStore = defineStore("app", () => {
@@ -326,6 +332,62 @@ export const useAppStore = defineStore("app", () => {
     isTransparencyEnabled.value = !isTransparencyEnabled.value
   }
 
+  const chatMessages = ref<Record<string, ChatMessage[]>>({})
+  const isLoading = ref(false)
+
+  const currentChatMessages = computed(() => {
+    return chatMessages.value[activeAssistantId.value] || []
+  })
+
+  async function sendMessage(message: string) {
+    if (!activeAssistant.value) return
+
+    const assistantId = activeAssistant.value.id
+    if (!chatMessages.value[assistantId]) {
+      chatMessages.value[assistantId] = []
+    }
+
+    chatMessages.value[assistantId].push({ role: "user", content: message })
+    isLoading.value = true
+
+    try {
+      let response: string
+      if (activeAssistant.value.name === "Alpha") {
+        const systemPrompt = "You are a helpful AI assistant named Alpha."
+        console.log(
+          "Sending message to Alpha with system prompt:",
+          systemPrompt
+        )
+        response = await aiService.queryClaude(message, systemPrompt)
+      } else {
+        response = "I'm sorry, I'm not implemented yet."
+      }
+      chatMessages.value[assistantId].push({
+        role: "assistant",
+        content: response,
+      })
+    } catch (error) {
+      console.error("Error querying AI:", error)
+      let errorMessage =
+        "I'm sorry, I encountered an error while processing your request. Please try again later."
+
+      if (error instanceof LowCreditError) {
+        errorMessage =
+          "I apologize, but the AI service is currently unavailable due to insufficient credit balance. Please contact the administrator to resolve this issue."
+      } else if (error instanceof Error) {
+        console.error("Error details:", error.message)
+        console.error("Error stack:", error.stack)
+      }
+
+      chatMessages.value[assistantId].push({
+        role: "error",
+        content: errorMessage,
+      })
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     isTransparencyEnabled,
     toggleTransparency,
@@ -343,5 +405,11 @@ export const useAppStore = defineStore("app", () => {
     addAssistantToGroup,
     addIndividualAssistant,
     updateAssistantAvatar,
+    sendMessage,
+    chatMessages,
+    currentChatMessages: computed(
+      () => chatMessages.value[activeAssistantId.value] || []
+    ),
+    isLoading,
   }
 })

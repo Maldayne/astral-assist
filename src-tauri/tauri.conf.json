@@ -96,7 +96,7 @@
       }
     },
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' tauri:; media-src 'self' https: data: mediastream:; img-src 'self' asset: data: blob: http:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; connect-src 'self' https://api.anthropic.com; media-src 'self' https: data: mediastream:; img-src 'self' asset: data: blob: http:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
     },
     "updater": {
       "active": false

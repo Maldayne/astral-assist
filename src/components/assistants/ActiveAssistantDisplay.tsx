@@ -1,6 +1,7 @@
+import CommandModule from "@/modules/command/CommandModule"
+import QueryModule from "@/modules/query/QueryModule"
 import { useAppStore } from "@/store/appStore"
 import { computed, defineComponent } from "vue"
-import ChatArea from "../chat/ChatArea"
 import AssistantHeader from "./AssistantHeader"
 import NoAssistantSelected from "./NoAssistantSelected"
 
@@ -15,10 +16,11 @@ export default defineComponent({
         {activeAssistant.value ? (
           <div class="h-full flex flex-col">
             <AssistantHeader assistant={activeAssistant.value} />
-            <ChatArea
-              assistantId={activeAssistant.value.id}
-              class="flex-grow overflow-y-auto mb-4"
-            />
+            {activeAssistant.value.type === "query" ? (
+              <QueryModule />
+            ) : (
+              <CommandModule />
+            )}
           </div>
         ) : (
           <NoAssistantSelected />
