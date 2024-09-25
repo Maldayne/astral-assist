@@ -1,32 +1,23 @@
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import { computed, defineComponent, PropType } from "vue"
+import { Textarea } from "@/components/ui/textarea"
+import { computed, defineComponent } from "vue"
 
 export default defineComponent({
-  name: "InputItem",
+  name: "TextareaItem",
   props: {
     modelValue: {
-      type: [String, Number],
+      type: String,
       required: true,
     },
     placeholder: {
       type: String,
       default: "",
     },
-    type: {
-      type: String as PropType<"text" | "password" | "email" | "number">,
-      default: "text",
-    },
     disabled: {
       type: Boolean,
       default: false,
     },
-    class: {
-      type: String,
-      default: "",
-    },
   },
-  emits: ["update:modelValue", "enter"],
+  emits: ["update:modelValue", "enter", "shiftEnter"],
   setup(props, { emit }) {
     const inputValue = computed({
       get: () => props.modelValue,
@@ -35,21 +26,24 @@ export default defineComponent({
 
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "Enter") {
-        emit("enter", inputValue.value)
+        if (event.shiftKey) {
+          emit("shiftEnter")
+        } else {
+          event.preventDefault()
+          emit("enter", inputValue.value)
+        }
       }
     }
 
     return () => (
-      <Input
+      <Textarea
         modelValue={inputValue.value}
-        onUpdate:modelValue={(value: string | number) =>
-          (inputValue.value = value)
-        }
+        onUpdate:modelValue={(value: string) => (inputValue.value = value)}
         placeholder={props.placeholder}
-        type={props.type}
         disabled={props.disabled}
         onKeydown={handleKeydown}
-        class={cn(props.class)}
+        class="resize-none"
+        rows={3}
       />
     )
   },

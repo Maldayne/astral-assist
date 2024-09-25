@@ -2,7 +2,7 @@ import { useDebounceFn } from "@vueuse/core"
 import { Send } from "lucide-vue-next"
 import { computed, defineComponent, shallowRef } from "vue"
 import ButtonItem from "../ui/ButtonItem"
-import InputItem from "../ui/InputItem"
+import TextareaItem from "../ui/TextareaItem"
 
 const MAX_CHARS = 4096
 
@@ -36,8 +36,8 @@ export default defineComponent({
       if (!isEmptyOrWhitespace.value) {
         const trimmedMessage = trimMessage(inputMessage.value)
         emit("sendMessage", trimmedMessage)
-        inputMessage.value = ""
       }
+      inputMessage.value = ""
     }, 300)
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -51,7 +51,7 @@ export default defineComponent({
       <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-4 sm:px-6 w-full">
         <div class="flex flex-col">
           <div class="flex items-center">
-            <InputItem
+            <TextareaItem
               v-model={inputMessage.value}
               placeholder="Type your message here..."
               class="flex-grow mr-4"
