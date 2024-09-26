@@ -1,4 +1,5 @@
 import DarkModeToggle from "@/features/theme/DarkModeToggle"
+import { STTProviderType } from "@/services/stt/STTFactory"
 import { useAppStore } from "@/store/appStore"
 import { Plus, XIcon } from "lucide-vue-next"
 import { defineComponent, PropType, ref } from "vue"
@@ -24,6 +25,11 @@ export default defineComponent({
     const newAssistantName = ref("")
     const newAssistantType = ref<"query" | "command">("query")
     const isTransparencyEnabled = ref(false)
+    const sttOptions = [
+      { value: "windows", label: "Windows STT" },
+      { value: "vosk", label: "Vosk STT (Not implemented)" },
+      { value: "whisper", label: "Whisper STT (Not implemented)" },
+    ]
 
     const assistantTypeOptions = [
       { value: "query", label: "Query Assistant" },
@@ -125,6 +131,17 @@ export default defineComponent({
                     Add Assistant
                   </ButtonItem>
                 </div>
+              </section>
+              <section aria-label="Speech-to-Text settings">
+                <h2 class="text-lg font-semibold mb-2">Speech-to-Text</h2>
+                <SelectItem
+                  modelValue={appStore.sttPreference}
+                  onUpdate:modelValue={(value: STTProviderType) =>
+                    appStore.setSttPreference(value)
+                  }
+                  options={sttOptions}
+                  placeholder="Select STT provider"
+                />
               </section>
             </div>
           </nav>

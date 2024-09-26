@@ -1,4 +1,5 @@
 import { aiService, LowCreditError } from "@/modules/query/aiService"
+import { STTProviderType } from "@/services/stt/STTFactory"
 import { defineStore } from "pinia"
 import { computed, ref } from "vue"
 
@@ -388,6 +389,12 @@ export const useAppStore = defineStore("app", () => {
     }
   }
 
+  const sttPreference = ref<STTProviderType>("windows")
+
+  const setSttPreference = (preference: STTProviderType) => {
+    sttPreference.value = preference
+  }
+
   return {
     isTransparencyEnabled,
     toggleTransparency,
@@ -411,5 +418,7 @@ export const useAppStore = defineStore("app", () => {
       () => chatMessages.value[activeAssistantId.value] || []
     ),
     isLoading,
+    sttPreference,
+    setSttPreference,
   }
 })
