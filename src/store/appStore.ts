@@ -217,10 +217,10 @@ export const useAppStore = defineStore("app", () => {
   const transcribedWords = shallowRef<string[]>([])
   const lastProcessedIndex = ref(-1)
   const detectedAssistantName = ref<string | null>(null)
-  const silenceDuration = ref(1500) // 1.5 seconds in milliseconds
+  const silenceDuration = ref(1000) // 1.5 seconds in milliseconds
   const nameMatchConfidence = ref(100) // 100% confidence by default
   const killSwitchWords = ref(["cancel", "stop"])
-  const continuousListeningTimeout = ref(300000) // 5 minutes in milliseconds
+  const continuousListeningTimeout = ref(1800000) // 30 minutes in milliseconds
 
   let sttProvider: STTProvider | null = null
 
