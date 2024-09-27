@@ -9,7 +9,8 @@
     "update-xml": "node scripts/xmlUpdater.mjs",
     "dev": "concurrently \"node scripts/xmlUpdater.mjs\" \"vite\"",
     "tauri": "tauri",
-    "tauri:dev": "concurrently \"node scripts/xmlUpdater.mjs\" \"tauri dev\""
+    "tauri:dev": "tauri dev",
+    "start": "node start-script.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.3",

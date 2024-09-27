@@ -18,7 +18,7 @@ struct AIQueryResponse {
 
 #[tauri::command]
 async fn query_claude(
-    app_handle: tauri::AppHandle,
+    _app_handle: tauri::AppHandle,
     request: AIQueryRequest
 ) -> Result<AIQueryResponse, String> {
     let client = Client::new();

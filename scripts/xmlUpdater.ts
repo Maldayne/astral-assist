@@ -16,6 +16,7 @@ const INSTRUCTIONS_PATH = path.join(
 )
 
 async function updateInstructionsFile() {
+  console.log("Updating repopack-ai-instructions.xml")
   try {
     const [designDoc, aiPrompt] = await Promise.all([
       fs.readFile(DESIGN_DOCUMENT_PATH, "utf-8"),
