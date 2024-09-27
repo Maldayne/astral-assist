@@ -3,7 +3,7 @@ import AssistantCarousel from "@/components/assistants/AssistantCarousel"
 import Header from "@/components/layout/Header"
 import SettingsDrawer from "@/components/layout/SettingsDrawer"
 import { useAppStore } from "@/store/appStore"
-import { computed, defineComponent, ref } from "vue"
+import { defineComponent, ref } from "vue"
 
 export default defineComponent({
   name: "Home",
@@ -13,13 +13,6 @@ export default defineComponent({
 
     const toggleDrawer = () => {
       isDrawerOpen.value = !isDrawerOpen.value
-    }
-
-    const assistants = computed(() => appStore.currentAssistants)
-    const activeAssistantId = computed(() => appStore.activeAssistantId)
-
-    const handleAssistantSelect = (id: string) => {
-      appStore.setActiveAssistant(id)
     }
 
     return () => (
