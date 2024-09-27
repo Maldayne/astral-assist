@@ -4,6 +4,7 @@ import { useAppStore } from "@/store/appStore"
 import { Plus, XIcon } from "lucide-vue-next"
 import { defineComponent, PropType, ref } from "vue"
 import ButtonItem from "../ui/ButtonItem"
+import InputItem from "../ui/InputItem"
 import SelectItem from "../ui/SelectItem"
 import ToggleItem from "../ui/ToggleItem"
 
@@ -24,7 +25,6 @@ export default defineComponent({
     const newGroupName = ref("")
     const newAssistantName = ref("")
     const newAssistantType = ref<"query" | "command">("query")
-    const isTransparencyEnabled = ref(false)
     const sttOptions = [
       { value: "windows", label: "Windows STT" },
       { value: "vosk", label: "Vosk STT (Not implemented)" },
@@ -86,17 +86,20 @@ export default defineComponent({
                 <h2 class="text-lg font-semibold mb-2">Transparency</h2>
                 <ToggleItem
                   modelValue={appStore.isTransparencyEnabled}
-                  onUpdate:modelValue={appStore.toggleTransparency}
+                  onUpdate:modelValue={() => appStore.toggleTransparency()}
                   label="Enable Transparency"
                 />
               </section>
               <section aria-label="Create new group">
                 <h2 class="text-lg font-semibold mb-2">Create New Group</h2>
                 <div class="space-y-2">
-                  <input
-                    v-model={newGroupName.value}
+                  <InputItem
+                    modelValue={newGroupName.value}
+                    onUpdate:modelValue={(value: string) =>
+                      (newGroupName.value = value)
+                    }
                     placeholder="New group name"
-                    class="w-full px-3 py-2 text-sm border rounded"
+                    class="w-full"
                     aria-label="New group name"
                   />
                   <ButtonItem
@@ -111,14 +114,20 @@ export default defineComponent({
               <section aria-label="Create new assistant">
                 <h2 class="text-lg font-semibold mb-2">Create New Assistant</h2>
                 <div class="space-y-2">
-                  <input
-                    v-model={newAssistantName.value}
+                  <InputItem
+                    modelValue={newAssistantName.value}
+                    onUpdate:modelValue={(value: string) =>
+                      (newAssistantName.value = value)
+                    }
                     placeholder="New assistant name"
-                    class="w-full px-3 py-2 text-sm border rounded"
+                    class="w-full"
                     aria-label="New assistant name"
                   />
                   <SelectItem
-                    v-model={newAssistantType.value}
+                    modelValue={newAssistantType.value}
+                    onUpdate:modelValue={(value: "query" | "command") =>
+                      (newAssistantType.value = value)
+                    }
                     options={assistantTypeOptions}
                     placeholder="Select assistant type"
                     class="w-full"
@@ -142,6 +151,54 @@ export default defineComponent({
                   options={sttOptions}
                   placeholder="Select STT provider"
                 />
+              </section>
+              <section aria-label="Continuous Listening Settings">
+                <h2 class="text-lg font-semibold mb-2">
+                  Continuous Listening Settings
+                </h2>
+                <div class="space-y-2">
+                  <InputItem
+                    modelValue={appStore.silenceDuration}
+                    onUpdate:modelValue={(value: string | number) =>
+                      (appStore.silenceDuration = Number(value))
+                    }
+                    type="number"
+                    placeholder="Silence Duration (ms)"
+                    class="w-full"
+                    aria-label="Silence Duration in milliseconds"
+                  />
+                  <InputItem
+                    modelValue={appStore.nameMatchConfidence}
+                    onUpdate:modelValue={(value: string | number) =>
+                      (appStore.nameMatchConfidence = Number(value))
+                    }
+                    type="number"
+                    placeholder="Name Match Confidence (%)"
+                    class="w-full"
+                    aria-label="Name Match Confidence percentage"
+                  />
+                  <InputItem
+                    modelValue={appStore.killSwitchWords.join(", ")}
+                    onUpdate:modelValue={(value: string) =>
+                      (appStore.killSwitchWords = value
+                        .split(",")
+                        .map((word) => word.trim()))
+                    }
+                    placeholder="Kill-switch Words (comma-separated)"
+                    class="w-full"
+                    aria-label="Kill-switch Words"
+                  />
+                  <InputItem
+                    modelValue={appStore.continuousListeningTimeout}
+                    onUpdate:modelValue={(value: string | number) =>
+                      (appStore.continuousListeningTimeout = Number(value))
+                    }
+                    type="number"
+                    placeholder="Continuous Listening Timeout (ms)"
+                    class="w-full"
+                    aria-label="Continuous Listening Timeout in milliseconds"
+                  />
+                </div>
               </section>
             </div>
           </nav>

@@ -46,6 +46,23 @@ export default defineComponent({
       }
     })
 
+    watch(
+      () => appStore.detectedAssistantName,
+      (name) => {
+        if (name) {
+          const assistantIndex = memoizedAssistants.value.findIndex(
+            (a) => a.name.toLowerCase() === name.toLowerCase()
+          )
+          if (assistantIndex !== -1) {
+            handleAssistantSelect(
+              memoizedAssistants.value[assistantIndex].id,
+              assistantIndex
+            )
+          }
+        }
+      }
+    )
+
     return () => (
       <Carousel
         opts={{

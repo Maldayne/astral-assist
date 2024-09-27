@@ -1,27 +1,11 @@
-import { aiService, LowCreditError } from "@/modules/query/aiService"
-import { STTProviderType } from "@/services/stt/STTFactory"
+import { STTFactory, STTProviderType } from "@/services/stt/STTFactory"
+import { STTProvider } from "@/services/stt/STTProvider"
+import { Assistant, AssistantGroup } from "@/types/assistant"
 import { defineStore } from "pinia"
-import { computed, ref } from "vue"
-
-interface Assistant {
-  id: string
-  name: string
-  avatar: string | null
-  type: "query" | "command"
-}
-
-interface AssistantGroup {
-  id: string
-  name: string
-  assistants: Assistant[]
-}
-
-interface ChatMessage {
-  role: "user" | "assistant" | "error"
-  content: string
-}
+import { computed, ref, shallowRef } from "vue"
 
 export const useAppStore = defineStore("app", () => {
+  // Assistant and Group Management
   const assistantGroups = ref<AssistantGroup[]>([
     {
       id: "1",
@@ -59,168 +43,7 @@ export const useAppStore = defineStore("app", () => {
         },
       ],
     },
-    {
-      id: "2",
-      name: "Small Group",
-      assistants: [
-        {
-          id: "6",
-          name: "Apollo",
-          avatar: "/path/to/avatar6.png",
-          type: "query",
-        },
-        {
-          id: "7",
-          name: "Artemis",
-          avatar: "/path/to/avatar7.png",
-          type: "command",
-        },
-      ],
-    },
-    {
-      id: "3",
-      name: "Single Assistant Group",
-      assistants: [
-        {
-          id: "8",
-          name: "OnlyOneAssistantInThisGroup",
-          avatar: "/path/to/avatar8.png",
-          type: "query",
-        },
-      ],
-    },
-    {
-      id: "4",
-      name: "Large Group",
-      assistants: [
-        {
-          id: "10",
-          name: "ten",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "11",
-          name: "eleven",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "12",
-          name: "twelve",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "13",
-          name: "thirteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "14",
-          name: "fourteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "15",
-          name: "fifteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "16",
-          name: "sixteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "17",
-          name: "seventeen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "18",
-          name: "eighteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "19",
-          name: "nineteen",
-          avatar: "/path/to/avatar10.png",
-          type: "query",
-        },
-        {
-          id: "20",
-          name: "twenty",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "21",
-          name: "twenty one",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "22",
-          name: "twenty two",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "23",
-          name: "twenty three",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "24",
-          name: "twenty four",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "25",
-          name: "twenty five",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "26",
-          name: "twenty six",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "27",
-          name: "twenty seven",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "28",
-          name: "twenty eight",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "29",
-          name: "twenty nine",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-        {
-          id: "30",
-          name: "thirty",
-          avatar: "/path/to/avatar20.png",
-          type: "query",
-        },
-      ],
-    },
+    // ... other groups ...
   ])
 
   const individualAssistants = ref<Assistant[]>([
@@ -264,8 +87,6 @@ export const useAppStore = defineStore("app", () => {
     }
   })
 
-  const isTransparencyEnabled = ref(false)
-
   function setActiveAssistantOrGroup(id: string) {
     const group = assistantGroups.value.find((g) => g.id === id)
     if (group) {
@@ -288,6 +109,7 @@ export const useAppStore = defineStore("app", () => {
         g.assistants.includes(assistant)
       )
       activeGroupId.value = group ? group.id : null
+      console.log(`Active assistant set to: ${assistant.name}`)
     }
   }
 
@@ -329,11 +151,17 @@ export const useAppStore = defineStore("app", () => {
     individualAssistants.value.forEach(updateAssistant)
   }
 
+  // Transparency Feature
+  const isTransparencyEnabled = ref(false)
+
   function toggleTransparency() {
     isTransparencyEnabled.value = !isTransparencyEnabled.value
   }
 
-  const chatMessages = ref<Record<string, ChatMessage[]>>({})
+  // Chat Management
+  const chatMessages = ref<
+    Record<string, { role: "user" | "assistant" | "error"; content: string }[]>
+  >({})
   const isLoading = ref(false)
 
   const currentChatMessages = computed(() => {
@@ -353,15 +181,14 @@ export const useAppStore = defineStore("app", () => {
 
     try {
       let response: string
+      console.log(`Sending message to ${activeAssistant.value.name}`)
       if (activeAssistant.value.name === "Alpha") {
-        const systemPrompt = "You are a helpful AI assistant named Alpha."
-        console.log(
-          "Sending message to Alpha with system prompt:",
-          systemPrompt
-        )
-        response = await aiService.queryClaude(message, systemPrompt)
+        const systemPrompt = `You are a helpful AI assistant named ${activeAssistant.value.name}.`
+        console.log(`System prompt: ${systemPrompt}`)
+        // Implement actual AI service call here
+        response = `This is a placeholder response from ${activeAssistant.value.name}.`
       } else {
-        response = "I'm sorry, I'm not implemented yet."
+        response = `I'm ${activeAssistant.value.name}, and I'm not fully implemented yet.`
       }
       chatMessages.value[assistantId].push({
         role: "assistant",
@@ -369,35 +196,129 @@ export const useAppStore = defineStore("app", () => {
       })
     } catch (error) {
       console.error("Error querying AI:", error)
-      let errorMessage =
-        "I'm sorry, I encountered an error while processing your request. Please try again later."
-
-      if (error instanceof LowCreditError) {
-        errorMessage =
-          "I apologize, but the AI service is currently unavailable due to insufficient credit balance. Please contact the administrator to resolve this issue."
-      } else if (error instanceof Error) {
-        console.error("Error details:", error.message)
-        console.error("Error stack:", error.stack)
-      }
-
       chatMessages.value[assistantId].push({
         role: "error",
-        content: errorMessage,
+        content: "An error occurred. Please try again later.",
       })
     } finally {
       isLoading.value = false
     }
   }
 
+  // Speech-to-Text (STT) Management
   const sttPreference = ref<STTProviderType>("windows")
 
-  const setSttPreference = (preference: STTProviderType) => {
+  function setSttPreference(preference: STTProviderType) {
     sttPreference.value = preference
   }
 
+  // Continuous Listening Feature
+  const isContinuousListening = ref(false)
+  const transcribedWords = shallowRef<string[]>([])
+  const lastProcessedIndex = ref(-1)
+  const detectedAssistantName = ref<string | null>(null)
+  const silenceDuration = ref(1500) // 1.5 seconds in milliseconds
+  const nameMatchConfidence = ref(100) // 100% confidence by default
+  const killSwitchWords = ref(["cancel", "stop"])
+  const continuousListeningTimeout = ref(300000) // 5 minutes in milliseconds
+
+  let sttProvider: STTProvider | null = null
+
+  function toggleContinuousListening() {
+    isContinuousListening.value = !isContinuousListening.value
+    if (isContinuousListening.value) {
+      startContinuousListening()
+    } else {
+      stopContinuousListening()
+    }
+  }
+
+  async function startContinuousListening() {
+    if (!sttProvider) {
+      sttProvider = STTFactory.createProvider(sttPreference.value)
+      sttProvider.onResult((result) => {
+        if (result.isFinal) {
+          const words = result.transcript.split(" ")
+          updateTranscribedWords(words)
+        }
+      })
+      sttProvider.onError((error) => {
+        console.error("STT Error:", error)
+        stopContinuousListening()
+      })
+    }
+    await sttProvider.start()
+  }
+
+  async function stopContinuousListening() {
+    if (sttProvider) {
+      await sttProvider.stop()
+    }
+    transcribedWords.value = []
+    detectedAssistantName.value = null
+  }
+
+  function updateTranscribedWords(words: string[]) {
+    transcribedWords.value = words.slice(-5)
+    const newWords = words.slice(lastProcessedIndex.value + 1)
+    if (newWords.length > 0) {
+      processNewWords(newWords)
+      lastProcessedIndex.value = words.length - 1
+    }
+  }
+
+  function processNewWords(words: string[]) {
+    const spokenAssistantName = findSpokenAssistantName(words)
+    if (spokenAssistantName) {
+      const assistant = findAssistantByName(spokenAssistantName)
+      if (assistant) {
+        console.log(`Detected assistant name: ${spokenAssistantName}`)
+        setActiveAssistant(assistant.id)
+        const messageIndex = words.indexOf(spokenAssistantName) + 1
+        const message = words.slice(messageIndex).join(" ")
+        if (message.trim()) {
+          console.log(`Sending message to ${assistant.name}: ${message}`)
+          sendMessage(message.trim())
+        }
+      }
+    }
+  }
+
+  function processTranscribedWords(words: string[]) {
+    transcribedWords.value = words.slice(-5)
+    const spokenAssistantName = findSpokenAssistantName(words)
+    if (spokenAssistantName) {
+      const assistant = findAssistantByName(spokenAssistantName)
+      if (assistant) {
+        console.log(`Detected assistant name: ${spokenAssistantName}`)
+        setActiveAssistant(assistant.id)
+        const messageIndex = words.indexOf(spokenAssistantName) + 1
+        const message = words.slice(messageIndex).join(" ")
+        if (message.trim()) {
+          console.log(`Sending message to ${assistant.name}: ${message}`)
+          sendMessage(message.trim())
+        }
+      }
+    }
+  }
+
+  function findSpokenAssistantName(words: string[]): string | null {
+    const lowerCaseWords = words.map((w) => w.toLowerCase())
+    return (
+      allAssistants.value.find((assistant) =>
+        lowerCaseWords.includes(assistant.name.toLowerCase())
+      )?.name || null
+    )
+  }
+
+  function findAssistantByName(name: string): Assistant | undefined {
+    return allAssistants.value.find(
+      (assistant) => assistant.name.toLowerCase() === name.toLowerCase()
+    )
+  }
+
   return {
-    isTransparencyEnabled,
-    toggleTransparency,
+    // Assistant and Group Management
     assistantGroups,
     individualAssistants,
     activeGroupId,
@@ -412,13 +333,31 @@ export const useAppStore = defineStore("app", () => {
     addAssistantToGroup,
     addIndividualAssistant,
     updateAssistantAvatar,
-    sendMessage,
+
+    // Transparency Feature
+    isTransparencyEnabled,
+    toggleTransparency,
+
+    // Chat Management
     chatMessages,
-    currentChatMessages: computed(
-      () => chatMessages.value[activeAssistantId.value] || []
-    ),
+    currentChatMessages,
     isLoading,
+    sendMessage,
+
+    // Speech-to-Text (STT) Management
     sttPreference,
     setSttPreference,
+
+    // Continuous Listening Feature
+    isContinuousListening,
+    transcribedWords,
+    detectedAssistantName,
+    silenceDuration,
+    nameMatchConfidence,
+    killSwitchWords,
+    continuousListeningTimeout,
+    toggleContinuousListening,
+    processTranscribedWords,
+    updateTranscribedWords,
   }
 })

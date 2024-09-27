@@ -1,9 +1,11 @@
+import { useAppStore } from "@/store/appStore"
 import { STTProvider, STTResult } from "./STTProvider"
 
 export class WindowsSTTProvider implements STTProvider {
   private recognition: SpeechRecognition | null = null
   private resultCallback: ((result: STTResult) => void) | null = null
   private errorCallback: ((error: Error) => void) | null = null
+  private appStore = useAppStore()
 
   constructor() {
     if (!("webkitSpeechRecognition" in window)) {
@@ -19,10 +21,17 @@ export class WindowsSTTProvider implements STTProvider {
     this.recognition.interimResults = true
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const words: string[] = []
+      for (let i = 0; i < event.results.length; i++) {
+        words.push(...event.results[i][0].transcript.trim().split(" "))
+      }
+      this.appStore.updateTranscribedWords(words)
+
       if (this.resultCallback) {
+        const lastResult = event.results[event.results.length - 1]
         const result: STTResult = {
-          transcript: event.results[event.results.length - 1][0].transcript,
-          isFinal: event.results[event.results.length - 1].isFinal,
+          transcript: words.join(" "),
+          isFinal: lastResult.isFinal,
         }
         this.resultCallback(result)
       }

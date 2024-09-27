@@ -1,12 +1,8 @@
-// src/components/chat/ChatInput.tsx
-
 import ButtonItem from "@/components/ui/ButtonItem"
 import TextareaItem from "@/components/ui/TextareaItem"
-import { STTFactory } from "@/services/stt/STTFactory"
-import { STTProvider, STTResult } from "@/services/stt/STTProvider"
 import { useAppStore } from "@/store/appStore"
-import { Mic, Send } from "lucide-vue-next"
-import { defineComponent, onUnmounted, ref } from "vue"
+import { Send } from "lucide-vue-next"
+import { defineComponent, onUnmounted, ref, watch } from "vue"
 
 export default defineComponent({
   name: "ChatInput",
@@ -20,32 +16,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const appStore = useAppStore()
     const inputMessage = ref("")
-    const isListening = ref(false)
-    const sttProvider = ref<STTProvider | null>(null)
-
-    const toggleListening = async () => {
-      if (isListening.value) {
-        await sttProvider.value?.stop()
-        isListening.value = false
-      } else {
-        try {
-          sttProvider.value = STTFactory.createProvider(appStore.sttPreference)
-          sttProvider.value.onResult((result: STTResult) => {
-            if (result.isFinal) {
-              inputMessage.value += result.transcript + " "
-            }
-          })
-          sttProvider.value.onError((error: Error) => {
-            console.error("STT Error:", error)
-            isListening.value = false
-          })
-          await sttProvider.value.start()
-          isListening.value = true
-        } catch (error) {
-          console.error("Failed to start STT:", error)
-        }
-      }
-    }
+    let silenceTimer: ReturnType<typeof setTimeout> | null = null
 
     const sendMessage = () => {
       if (inputMessage.value.trim()) {
@@ -54,9 +25,32 @@ export default defineComponent({
       }
     }
 
+    watch(
+      () => appStore.transcribedWords,
+      (newWords) => {
+        if (appStore.isContinuousListening && appStore.activeAssistant) {
+          inputMessage.value = newWords.join(" ")
+
+          if (silenceTimer) {
+            clearTimeout(silenceTimer)
+          }
+
+          silenceTimer = setTimeout(() => {
+            if (
+              !appStore.killSwitchWords.some((word) =>
+                inputMessage.value.toLowerCase().includes(word)
+              )
+            ) {
+              sendMessage()
+            }
+          }, appStore.silenceDuration)
+        }
+      }
+    )
+
     onUnmounted(() => {
-      if (isListening.value) {
-        sttProvider.value?.stop()
+      if (silenceTimer) {
+        clearTimeout(silenceTimer)
       }
     })
 
@@ -68,13 +62,6 @@ export default defineComponent({
           disabled={props.disabled}
           onEnter={sendMessage}
         />
-        <ButtonItem
-          onClick={toggleListening}
-          disabled={props.disabled}
-          class={isListening.value ? "bg-red-500" : ""}
-        >
-          <Mic />
-        </ButtonItem>
         <ButtonItem
           onClick={sendMessage}
           disabled={props.disabled || !inputMessage.value.trim()}
