@@ -19,7 +19,7 @@ export default defineComponent({
         class={cn("p-6", props.class)}
         style={{
           backgroundColor: props.backgroundColor,
-          borderRadius: "inherit", // This ensures it respects the parent's border radius
+          borderRadius: "inherit",
         }}
       >
         {slots.default?.()}
