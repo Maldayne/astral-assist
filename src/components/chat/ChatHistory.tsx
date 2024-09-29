@@ -23,7 +23,9 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["updateFilter"],
+  emits: {
+    updateFilter: (value: string[]) => true,
+  },
   setup(props, { emit }) {
     const assistantOptions = computed(() => [
       { value: "all", label: "All Assistants" },
@@ -65,8 +67,11 @@ export default defineComponent({
           <MultiSelectItem
             modelValue={props.selectedAssistantFilter}
             options={assistantOptions.value}
+            onUpdate:modelValue={(value: string[]) =>
+              emit("updateFilter", value)
+            }
             placeholder="Select assistants"
-            onUpdate:modelValue={(value) => emit("updateFilter", value)}
+            class="w-full"
           />
         </div>
 
