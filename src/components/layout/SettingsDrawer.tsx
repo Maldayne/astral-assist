@@ -6,7 +6,6 @@ import { defineComponent, PropType, ref } from "vue"
 import ButtonItem from "../ui/ButtonItem"
 import InputItem from "../ui/InputItem"
 import SelectItem from "../ui/SelectItem"
-import ToggleItem from "../ui/ToggleItem"
 
 export default defineComponent({
   name: "SettingsDrawer",
@@ -25,6 +24,7 @@ export default defineComponent({
     const newGroupName = ref("")
     const newAssistantName = ref("")
     const newAssistantType = ref<"query" | "command">("query")
+
     const sttOptions = [
       { value: "windows", label: "Windows STT" },
       { value: "vosk", label: "Vosk STT (Not implemented)" },
@@ -50,6 +50,7 @@ export default defineComponent({
           name: newAssistantName.value.trim(),
           avatar: "/placeholder-avatar.png",
           type: newAssistantType.value,
+          backgroundColor: newAssistantType.value,
         })
         newAssistantName.value = ""
         newAssistantType.value = "query"
@@ -81,14 +82,6 @@ export default defineComponent({
               <section aria-label="Theme settings">
                 <h2 class="text-lg font-semibold mb-2">Theme</h2>
                 <DarkModeToggle />
-              </section>
-              <section aria-label="Transparency settings">
-                <h2 class="text-lg font-semibold mb-2">Transparency</h2>
-                <ToggleItem
-                  modelValue={appStore.isTransparencyEnabled}
-                  onUpdate:modelValue={() => appStore.toggleTransparency()}
-                  label="Enable Transparency"
-                />
               </section>
               <section aria-label="Create new group">
                 <h2 class="text-lg font-semibold mb-2">Create New Group</h2>

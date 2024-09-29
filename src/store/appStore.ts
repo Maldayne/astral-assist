@@ -1,8 +1,14 @@
+import { aiService } from "@/modules/query/aiService"
 import { STTFactory, STTProviderType } from "@/services/stt/STTFactory"
 import { STTProvider } from "@/services/stt/STTProvider"
 import { Assistant, AssistantGroup } from "@/types/assistant"
 import { defineStore } from "pinia"
 import { computed, ref, shallowRef } from "vue"
+
+interface ChatMessage {
+  role: "user" | "assistant" | "error" | "system"
+  content: string
+}
 
 export const useAppStore = defineStore("app", () => {
   // Assistant and Group Management
@@ -16,30 +22,35 @@ export const useAppStore = defineStore("app", () => {
           name: "Alpha",
           avatar: "/path/to/avatar1.png",
           type: "query",
+          backgroundColor: "blue",
         },
         {
           id: "2",
           name: "Bravo",
           avatar: "/path/to/avatar2.png",
           type: "command",
+          backgroundColor: "green",
         },
         {
           id: "3",
           name: "Charlie",
           avatar: "/path/to/avatar3.png",
           type: "query",
+          backgroundColor: "yellow",
         },
         {
           id: "4",
           name: "Delta",
           avatar: "/path/to/avatar4.png",
           type: "command",
+          backgroundColor: "red",
         },
         {
           id: "5",
           name: "Echo",
           avatar: "/path/to/avatar5.png",
           type: "query",
+          backgroundColor: "orange",
         },
       ],
     },
@@ -51,6 +62,7 @@ export const useAppStore = defineStore("app", () => {
       name: "Solo Assistant",
       avatar: "/path/to/avatar9.png",
       type: "command",
+      backgroundColor: "#E6FFE6",
     },
   ])
 
@@ -86,6 +98,36 @@ export const useAppStore = defineStore("app", () => {
     }
   })
 
+  // Chat Management
+  const chatMessages = ref<Record<string, ChatMessage[]>>({})
+  const selectedAssistantFilter = ref<string | null>(null)
+  const isLoading = ref(false)
+
+  const filteredChatMessages = computed(() => {
+    if (selectedAssistantFilter.value === null) {
+      return chatMessages.value
+    }
+    const filteredMessages: Record<string, ChatMessage[]> = {}
+    if (selectedAssistantFilter.value in chatMessages.value) {
+      filteredMessages[selectedAssistantFilter.value] =
+        chatMessages.value[selectedAssistantFilter.value]
+    }
+    return filteredMessages
+  })
+
+  // STT Management
+  const sttPreference = ref<STTProviderType>("windows")
+  const isContinuousListening = ref(false)
+  const transcribedWords = shallowRef<string[]>([])
+  const detectedAssistantName = ref<string | null>(null)
+  const silenceDuration = ref(1000)
+  const nameMatchConfidence = ref(100)
+  const killSwitchWords = ref(["cancel", "stop"])
+  const continuousListeningTimeout = ref(1800000)
+
+  let sttProvider: STTProvider | null = null
+
+  // Functions
   function setActiveAssistantOrGroup(id: string) {
     const group = assistantGroups.value.find((g) => g.id === id)
     if (group) {
@@ -108,7 +150,6 @@ export const useAppStore = defineStore("app", () => {
         g.assistants.includes(assistant)
       )
       activeGroupId.value = group ? group.id : null
-      console.log(`Active assistant set to: ${assistant.name}`)
     }
   }
 
@@ -123,15 +164,29 @@ export const useAppStore = defineStore("app", () => {
     })
   }
 
-  function addAssistantToGroup(groupId: string, assistant: Assistant) {
+  const DEFAULT_ASSISTANT_COLOR = "#E8EEF4"
+
+  function addAssistantToGroup(groupId: string, assistant: Partial<Assistant>) {
     const group = assistantGroups.value.find((g) => g.id === groupId)
     if (group) {
-      group.assistants.push(assistant)
+      group.assistants.push({
+        id: Date.now().toString(),
+        name: assistant.name || "New Assistant",
+        avatar: assistant.avatar || null,
+        type: assistant.type || "query",
+        backgroundColor: assistant.backgroundColor || DEFAULT_ASSISTANT_COLOR,
+      })
     }
   }
 
-  function addIndividualAssistant(assistant: Assistant) {
-    individualAssistants.value.push(assistant)
+  function addIndividualAssistant(assistant: Partial<Assistant>) {
+    individualAssistants.value.push({
+      id: Date.now().toString(),
+      name: assistant.name || "New Assistant",
+      avatar: assistant.avatar || null,
+      type: assistant.type || "query",
+      backgroundColor: assistant.backgroundColor || DEFAULT_ASSISTANT_COLOR,
+    })
   }
 
   function updateAssistantAvatar(
@@ -150,52 +205,39 @@ export const useAppStore = defineStore("app", () => {
     individualAssistants.value.forEach(updateAssistant)
   }
 
-  // Transparency Feature
-  const isTransparencyEnabled = ref(false)
-
-  function toggleTransparency() {
-    isTransparencyEnabled.value = !isTransparencyEnabled.value
-  }
-
-  // Chat Management
-  const chatMessages = ref<
-    Record<string, { role: "user" | "assistant" | "error"; content: string }[]>
-  >({})
-  const isLoading = ref(false)
-
-  const currentChatMessages = computed(() => {
-    return chatMessages.value[activeAssistantId.value] || []
-  })
-
-  async function sendMessage(message: string) {
-    if (!activeAssistant.value) return
-
-    const assistantId = activeAssistant.value.id
+  function addMessage(assistantId: string, message: ChatMessage) {
     if (!chatMessages.value[assistantId]) {
       chatMessages.value[assistantId] = []
     }
+    chatMessages.value[assistantId].push(message)
+  }
 
-    chatMessages.value[assistantId].push({ role: "user", content: message })
+  function setAssistantFilter(assistantId: string | null) {
+    selectedAssistantFilter.value = assistantId
+  }
+
+  async function sendMessage(message: string) {
+    if (!activeAssistant.value || typeof activeAssistant.value.id !== "string")
+      return
+
+    const assistantId = activeAssistant.value.id
+    addMessage(assistantId, { role: "user", content: message })
     isLoading.value = true
 
     try {
       let response: string
       console.log(`Sending message to ${activeAssistant.value.name}`)
-      if (activeAssistant.value.name === "Alpha") {
+      if (activeAssistant.value.type === "query") {
         const systemPrompt = `You are a helpful AI assistant named ${activeAssistant.value.name}.`
         console.log(`System prompt: ${systemPrompt}`)
-        // Implement actual AI service call here
-        response = `This is a placeholder response from ${activeAssistant.value.name}.`
+        response = await aiService.queryClaude(message, systemPrompt)
       } else {
-        response = `I'm ${activeAssistant.value.name}, and I'm not fully implemented yet.`
+        response = `I'm ${activeAssistant.value.name}, a command assistant, and I'm not fully implemented yet.`
       }
-      chatMessages.value[assistantId].push({
-        role: "assistant",
-        content: response,
-      })
+      addMessage(assistantId, { role: "assistant", content: response })
     } catch (error) {
       console.error("Error querying AI:", error)
-      chatMessages.value[assistantId].push({
+      addMessage(assistantId, {
         role: "error",
         content: "An error occurred. Please try again later.",
       })
@@ -204,24 +246,9 @@ export const useAppStore = defineStore("app", () => {
     }
   }
 
-  // Speech-to-Text (STT) Management
-  const sttPreference = ref<STTProviderType>("windows")
-
   function setSttPreference(preference: STTProviderType) {
     sttPreference.value = preference
   }
-
-  // Continuous Listening Feature
-  const isContinuousListening = ref(false)
-  const transcribedWords = shallowRef<string[]>([])
-  const lastProcessedIndex = ref(-1)
-  const detectedAssistantName = ref<string | null>(null)
-  const silenceDuration = ref(1000) // 1 second in milliseconds
-  const nameMatchConfidence = ref(100) // 100% confidence by default
-  const killSwitchWords = ref(["cancel", "stop"])
-  const continuousListeningTimeout = ref(1800000) // 30 minutes in milliseconds
-
-  let sttProvider: STTProvider | null = null
 
   function toggleContinuousListening() {
     isContinuousListening.value = !isContinuousListening.value
@@ -259,11 +286,7 @@ export const useAppStore = defineStore("app", () => {
 
   function updateTranscribedWords(words: string[]) {
     transcribedWords.value = words.slice(-5)
-    const newWords = words.slice(lastProcessedIndex.value + 1)
-    if (newWords.length > 0) {
-      processNewWords(newWords)
-      lastProcessedIndex.value = words.length - 1
-    }
+    processNewWords(words)
   }
 
   function processNewWords(words: string[]) {
@@ -271,30 +294,10 @@ export const useAppStore = defineStore("app", () => {
     if (spokenAssistantName) {
       const assistant = findAssistantByName(spokenAssistantName)
       if (assistant) {
-        console.log(`Detected assistant name: ${spokenAssistantName}`)
         setActiveAssistant(assistant.id)
         const messageIndex = words.indexOf(spokenAssistantName) + 1
         const message = words.slice(messageIndex).join(" ")
         if (message.trim()) {
-          console.log(`Sending message to ${assistant.name}: ${message}`)
-          sendMessage(message.trim())
-        }
-      }
-    }
-  }
-
-  function processTranscribedWords(words: string[]) {
-    transcribedWords.value = words.slice(-5)
-    const spokenAssistantName = findSpokenAssistantName(words)
-    if (spokenAssistantName) {
-      const assistant = findAssistantByName(spokenAssistantName)
-      if (assistant) {
-        console.log(`Detected assistant name: ${spokenAssistantName}`)
-        setActiveAssistant(assistant.id)
-        const messageIndex = words.indexOf(spokenAssistantName) + 1
-        const message = words.slice(messageIndex).join(" ")
-        if (message.trim()) {
-          console.log(`Sending message to ${assistant.name}: ${message}`)
           sendMessage(message.trim())
         }
       }
@@ -316,6 +319,25 @@ export const useAppStore = defineStore("app", () => {
     )
   }
 
+  // Dark Mode Management
+  const isDarkMode = ref(true)
+
+  function toggleDarkMode() {
+    isDarkMode.value = !isDarkMode.value
+    updateDarkMode(isDarkMode.value)
+  }
+
+  function updateDarkMode(dark: boolean) {
+    if (dark) {
+      document.documentElement.classList.add("dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+    }
+  }
+
+  // Initialize dark mode on app start
+  updateDarkMode(isDarkMode.value)
+
   return {
     // Assistant and Group Management
     assistantGroups,
@@ -333,21 +355,17 @@ export const useAppStore = defineStore("app", () => {
     addIndividualAssistant,
     updateAssistantAvatar,
 
-    // Transparency Feature
-    isTransparencyEnabled,
-    toggleTransparency,
-
     // Chat Management
     chatMessages,
-    currentChatMessages,
+    filteredChatMessages,
     isLoading,
+    selectedAssistantFilter,
+    addMessage,
+    setAssistantFilter,
     sendMessage,
 
-    // Speech-to-Text (STT) Management
+    // STT Management
     sttPreference,
-    setSttPreference,
-
-    // Continuous Listening Feature
     isContinuousListening,
     transcribedWords,
     detectedAssistantName,
@@ -355,8 +373,12 @@ export const useAppStore = defineStore("app", () => {
     nameMatchConfidence,
     killSwitchWords,
     continuousListeningTimeout,
+    setSttPreference,
     toggleContinuousListening,
-    processTranscribedWords,
     updateTranscribedWords,
+
+    // Dark Mode Management
+    isDarkMode,
+    toggleDarkMode,
   }
 })

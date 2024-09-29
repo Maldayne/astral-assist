@@ -12,6 +12,10 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    backgroundColor: {
+      type: String,
+      default: "",
+    },
   },
   setup(props) {
     const formatContent = (content: string) => {
@@ -36,9 +40,14 @@ export default defineComponent({
             props.role === "user"
               ? "bg-blue-500 text-white"
               : props.role === "assistant"
-                ? "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                ? "text-gray-900 dark:text-white"
                 : "bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100"
           )}
+          style={
+            props.role === "assistant"
+              ? { backgroundColor: props.backgroundColor }
+              : {}
+          }
         >
           {formatContent(props.content)}
         </div>

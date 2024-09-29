@@ -2,6 +2,7 @@ import DefaultAIIcon from "@/components/icons/DefaultAIIcon"
 import CardContentItem from "@/components/ui/CardContentItem"
 import CardItem from "@/components/ui/CardItem"
 import { cn } from "@/lib/utils"
+import { useAppStore } from "@/store/appStore"
 import { defineComponent, h, PropType, ref } from "vue"
 
 interface AssistantCardProps {
@@ -10,6 +11,7 @@ interface AssistantCardProps {
   avatar: string | null
   isActive: boolean
   type: "query" | "command"
+  backgroundColor: string
 }
 
 export default defineComponent({
@@ -25,6 +27,7 @@ export default defineComponent({
     },
   },
   setup(props) {
+    const appStore = useAppStore()
     const imageError = ref(false)
 
     const handleImageError = () => {
@@ -34,14 +37,17 @@ export default defineComponent({
     return () => (
       <CardItem
         class={cn(
-          "bg-transparent",
+          "transition-colors duration-200",
           props.assistant.isActive
             ? "border-primary mx-2"
             : "hover:border-x-primary"
         )}
         onClick={() => props.onSelect(props.assistant.id)}
       >
-        <CardContentItem class="flex flex-col items-center justify-center p-4">
+        <CardContentItem
+          class="flex flex-col items-center justify-center p-4"
+          backgroundColor={props.assistant.backgroundColor}
+        >
           {props.assistant.avatar && !imageError.value ? (
             <img
               src={props.assistant.avatar}

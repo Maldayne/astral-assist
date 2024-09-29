@@ -3,6 +3,7 @@ export interface Assistant {
   name: string
   avatar: string | null
   type: "query" | "command"
+  backgroundColor: string
 }
 
 export interface AssistantCardProps extends Assistant {

@@ -2,7 +2,7 @@ import { defineComponent, PropType } from "vue"
 import ChatMessage from "./ChatMessage"
 
 interface ChatMessage {
-  role: "user" | "assistant"
+  role: "user" | "assistant" | "error" | "system"
   content: string
 }
 
@@ -11,6 +11,10 @@ export default defineComponent({
   props: {
     messages: {
       type: Array as PropType<ChatMessage[]>,
+      required: true,
+    },
+    assistantBackgroundColor: {
+      type: String,
       required: true,
     },
   },
@@ -23,6 +27,11 @@ export default defineComponent({
               key={index}
               role={message.role}
               content={message.content}
+              backgroundColor={
+                message.role === "assistant"
+                  ? props.assistantBackgroundColor
+                  : ""
+              }
             />
           ))}
         </div>

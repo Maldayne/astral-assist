@@ -1,8 +1,9 @@
 import ButtonItem from "@/components/ui/ButtonItem"
 import TextareaItem from "@/components/ui/TextareaItem"
 import { useAppStore } from "@/store/appStore"
+import { Assistant } from "@/types/assistant"
 import { Send } from "lucide-vue-next"
-import { defineComponent, onUnmounted, ref, watch } from "vue"
+import { defineComponent, onUnmounted, PropType, ref, watch } from "vue"
 
 export default defineComponent({
   name: "ChatInput",
@@ -10,6 +11,10 @@ export default defineComponent({
     disabled: {
       type: Boolean,
       default: false,
+    },
+    currentAssistant: {
+      type: Object as PropType<Assistant | null>,
+      default: null,
     },
   },
   emits: ["sendMessage"],
@@ -28,7 +33,7 @@ export default defineComponent({
     watch(
       () => appStore.transcribedWords,
       (newWords) => {
-        if (appStore.isContinuousListening && appStore.activeAssistant) {
+        if (appStore.isContinuousListening && props.currentAssistant) {
           inputMessage.value = newWords.join(" ")
 
           if (silenceTimer) {
@@ -58,7 +63,7 @@ export default defineComponent({
       <div class="flex items-center space-x-2 p-4">
         <TextareaItem
           v-model={inputMessage.value}
-          placeholder="Type your message..."
+          placeholder={`Type your message to ${props.currentAssistant?.name || "the assistant"}...`}
           disabled={props.disabled}
           onEnter={sendMessage}
         />

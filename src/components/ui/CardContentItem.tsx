@@ -8,8 +8,22 @@ export default defineComponent({
       type: String as PropType<string>,
       default: "",
     },
+    backgroundColor: {
+      type: String as PropType<string>,
+      default: "",
+    },
   },
   setup(props, { slots }) {
-    return () => <div class={cn("p-6", props.class)}>{slots.default?.()}</div>
+    return () => (
+      <div
+        class={cn("p-6", props.class)}
+        style={{
+          backgroundColor: props.backgroundColor,
+          borderRadius: "inherit", // This ensures it respects the parent's border radius
+        }}
+      >
+        {slots.default?.()}
+      </div>
+    )
   },
 })
