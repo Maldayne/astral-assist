@@ -1,31 +1,17 @@
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
-import { defineComponent, onMounted, ref, watch } from "vue"
+import { useAppStore } from "@/store/appStore"
+import { defineComponent } from "vue"
 
 export default defineComponent({
   name: "DarkModeToggle",
   setup() {
-    const isDark = ref(false)
-
-    const updateDarkMode = (dark: boolean) => {
-      if (dark) {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
-    }
+    const appStore = useAppStore()
 
     const toggleDarkMode = () => {
-      isDark.value = !isDark.value
-      updateDarkMode(isDark.value)
+      appStore.toggleDarkMode()
     }
-
-    onMounted(() => {
-      isDark.value = document.documentElement.classList.contains("dark")
-    })
-
-    watch(isDark, updateDarkMode)
 
     return () => (
       <div class="flex items-center space-x-2">
@@ -37,17 +23,17 @@ export default defineComponent({
         </Label>
         <Switch
           id="dark-mode"
-          checked={isDark.value}
+          checked={appStore.isDarkMode}
           onUpdate:checked={toggleDarkMode}
           class={cn(
             "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50",
-            isDark.value ? "bg-blue-600" : "bg-gray-200"
+            appStore.isDarkMode ? "bg-blue-600" : "bg-gray-200"
           )}
         >
           <span
             class={cn(
               "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-              isDark.value ? "translate-x-6" : "translate-x-1"
+              appStore.isDarkMode ? "translate-x-6" : "translate-x-1"
             )}
           />
         </Switch>
