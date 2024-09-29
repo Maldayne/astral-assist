@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { Check, ChevronsUpDown } from "lucide-vue-next"
 import { computed, defineComponent, PropType, ref } from "vue"
 
-interface Option {
+interface Item {
   value: string
   label: string
 }
@@ -24,8 +24,8 @@ interface Option {
 export default defineComponent({
   name: "MultiSelectItem",
   props: {
-    options: {
-      type: Array as PropType<Option[]>,
+    items: {
+      type: Array as PropType<Item[]>,
       required: true,
     },
     modelValue: {
@@ -54,7 +54,7 @@ export default defineComponent({
 
     const selectedLabels = computed(() =>
       props.modelValue.map(
-        (val) => props.options.find((option) => option.value === val)?.label
+        (val) => props.items.find((option) => option.value === val)?.label
       )
     )
 
@@ -91,7 +91,7 @@ export default defineComponent({
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
               <CommandList>
-                {props.options.map((option) => (
+                {props.items.map((option) => (
                   <CommandItem
                     key={option.value}
                     value={option.value}
