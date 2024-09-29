@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Check, ChevronsUpDown } from "lucide-vue-next"
-import { computed, defineComponent, PropType, ref } from "vue"
+import { computed, defineComponent, PropType, ref, watchEffect } from "vue"
 
 interface Item {
   value: string
@@ -36,26 +36,42 @@ export default defineComponent({
       type: String,
       default: "Select options...",
     },
+    defaultValue: {
+      type: Array as PropType<string[]>,
+      default: () => [],
+    },
   },
   emits: ["update:modelValue"],
   setup(props, { emit }) {
     const open = ref(false)
+    const selectedItems = ref<string[]>([])
+
+    watchEffect(() => {
+      selectedItems.value =
+        props.modelValue.length > 0 ? props.modelValue : props.defaultValue
+    })
 
     const handleSetValue = (val: string) => {
-      const newValue = [...props.modelValue]
-      const index = newValue.indexOf(val)
-      if (index !== -1) {
-        newValue.splice(index, 1)
-      } else {
-        newValue.push(val)
-      }
+      const newValue = selectedItems.value.includes(val)
+        ? selectedItems.value.filter((item) => item !== val)
+        : [...selectedItems.value, val]
       emit("update:modelValue", newValue)
     }
 
-    const selectedLabels = computed(() =>
-      props.modelValue.map(
-        (val) => props.items.find((option) => option.value === val)?.label
-      )
+    const handleSelectAll = (checked: boolean) => {
+      const newValue = checked ? props.items.map((item) => item.value) : []
+      emit("update:modelValue", newValue)
+    }
+
+    const isAllSelected = computed(
+      () => selectedItems.value.length === props.items.length
+    )
+
+    const selectedLabels = computed(
+      () =>
+        selectedItems.value
+          .map((val) => props.items.find((item) => item.value === val)?.label)
+          .filter(Boolean) as string[]
     )
 
     return () => (
@@ -71,7 +87,7 @@ export default defineComponent({
             class="w-[480px] justify-between"
           >
             <div class="flex gap-2 justify-start">
-              {props.modelValue.length
+              {selectedLabels.value.length > 0
                 ? selectedLabels.value.map((label, i) => (
                     <div
                       key={i}
@@ -90,6 +106,19 @@ export default defineComponent({
             <CommandInput placeholder={`Search ${props.placeholder}...`} />
             <CommandEmpty>No option found.</CommandEmpty>
             <CommandGroup>
+              <CommandItem
+                onSelect={() => handleSelectAll(!isAllSelected.value)}
+              >
+                <div class="flex items-center">
+                  <Check
+                    class={cn(
+                      "mr-2 h-4 w-4",
+                      isAllSelected.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  Select All
+                </div>
+              </CommandItem>
               <CommandList>
                 {props.items.map((option) => (
                   <CommandItem
@@ -100,7 +129,7 @@ export default defineComponent({
                     <Check
                       class={cn(
                         "mr-2 h-4 w-4",
-                        props.modelValue.includes(option.value)
+                        selectedItems.value.includes(option.value)
                           ? "opacity-100"
                           : "opacity-0"
                       )}

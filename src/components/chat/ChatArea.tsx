@@ -1,5 +1,5 @@
 import { useAppStore } from "@/store/appStore"
-import { computed, defineComponent } from "vue"
+import { computed, defineComponent, ref, watch } from "vue"
 import ChatHistory from "./ChatHistory"
 import ChatInput from "./ChatInput"
 
@@ -16,8 +16,24 @@ export default defineComponent({
         : []
     )
 
+    const selectedAssistantFilter = ref<string[]>([])
+
+    watch(
+      () => currentGroupAssistants.value,
+      (newAssistants) => {
+        selectedAssistantFilter.value = newAssistants.map(
+          (assistant) => assistant.id
+        )
+      },
+      { immediate: true }
+    )
+
     const sendMessage = (message: string) => {
       appStore.sendMessage(message)
+    }
+
+    const updateAssistantFilter = (filter: string[]) => {
+      selectedAssistantFilter.value = filter
     }
 
     return () => (
@@ -25,8 +41,8 @@ export default defineComponent({
         <ChatHistory
           messages={appStore.filteredChatMessages}
           currentGroupAssistants={currentGroupAssistants.value}
-          selectedAssistantFilter={appStore.selectedAssistantFilter}
-          onUpdateFilter={appStore.setAssistantFilter}
+          selectedAssistantFilter={selectedAssistantFilter.value}
+          onUpdateFilter={updateAssistantFilter}
           isLoading={appStore.isLoading}
         />
         <ChatInput

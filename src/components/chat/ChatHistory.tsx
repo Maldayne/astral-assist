@@ -27,18 +27,18 @@ export default defineComponent({
     updateFilter: (value: string[]) => true,
   },
   setup(props, { emit }) {
-    const assistantOptions = computed(() => [
-      { value: "all", label: "All Assistants" },
-      ...props.currentGroupAssistants.map((assistant) => ({
+    const assistantOptions = computed(() =>
+      props.currentGroupAssistants.map((assistant) => ({
         value: assistant.id,
         label: assistant.name,
-      })),
-    ])
+      }))
+    )
 
     const filteredMessages = computed(() => {
       if (
-        props.selectedAssistantFilter.includes("all") ||
-        props.selectedAssistantFilter.length === 0
+        props.selectedAssistantFilter.length === 0 ||
+        props.selectedAssistantFilter.length ===
+          props.currentGroupAssistants.length
       ) {
         return props.messages
       }
@@ -65,13 +65,14 @@ export default defineComponent({
       <div class="flex-1 overflow-y-auto py-4 w-full">
         <div class="mb-4">
           <MultiSelectItem
+            items={assistantOptions.value}
             modelValue={props.selectedAssistantFilter}
-            options={assistantOptions.value}
             onUpdate:modelValue={(value: string[]) =>
               emit("updateFilter", value)
             }
             placeholder="Select assistants"
             class="w-full"
+            defaultValue={assistantOptions.value.map((option) => option.value)}
           />
         </div>
 
