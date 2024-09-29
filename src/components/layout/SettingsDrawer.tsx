@@ -25,11 +25,15 @@ export default defineComponent({
     const newAssistantName = ref("")
     const newAssistantType = ref<"query" | "command">("query")
 
-    const sttOptions = [
+    const sttOptions: { value: STTProviderType; label: string }[] = [
       { value: "windows", label: "Windows STT" },
       { value: "vosk", label: "Vosk STT (Not implemented)" },
       { value: "whisper", label: "Whisper STT (Not implemented)" },
     ]
+
+    const updateSTTPreference = (value: STTProviderType) => {
+      appStore.setSttPreference(value)
+    }
 
     const assistantTypeOptions = [
       { value: "query", label: "Query Assistant" },
@@ -137,12 +141,11 @@ export default defineComponent({
               <section aria-label="Speech-to-Text settings">
                 <h2 class="text-lg font-semibold mb-2">Speech-to-Text</h2>
                 <SelectItem
-                  modelValue={[appStore.sttPreference]}
-                  onUpdate:modelValue={(value: string[]) =>
-                    appStore.setSttPreference(value[0] as STTProviderType)
-                  }
+                  modelValue={appStore.sttPreference}
                   options={sttOptions}
+                  onUpdate:modelValue={updateSTTPreference}
                   placeholder="Select STT provider"
+                  class="w-full"
                 />
               </section>
               <section aria-label="Continuous Listening Settings">

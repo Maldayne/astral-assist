@@ -60,8 +60,8 @@ export default defineComponent({
 
     return () => (
       <Popover
-        v-model:open={open.value}
-        onUpdate:open={(value) => (open.value = value)}
+        open={open.value}
+        onUpdate:open={(value: boolean) => (open.value = value)}
       >
         <PopoverTrigger asChild>
           <Button
