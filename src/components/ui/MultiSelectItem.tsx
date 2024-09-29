@@ -19,6 +19,7 @@ import { computed, defineComponent, PropType, ref, watchEffect } from "vue"
 interface Item {
   value: string
   label: string
+  color?: string // Optional color property
 }
 
 export default defineComponent({
@@ -72,8 +73,8 @@ export default defineComponent({
     const selectedLabels = computed(
       () =>
         selectedItems.value
-          .map((val) => props.items.find((item) => item.value === val)?.label)
-          .filter(Boolean) as string[]
+          .map((val) => props.items.find((item) => item.value === val))
+          .filter(Boolean) as Item[]
     )
 
     return () => (
@@ -91,12 +92,16 @@ export default defineComponent({
             >
               <div class="flex gap-2 justify-start">
                 {selectedLabels.value.length > 0
-                  ? selectedLabels.value.map((label, i) => (
+                  ? selectedLabels.value.map((item, i) => (
                       <div
                         key={i}
-                        class="px-2 py-1 rounded-xl border bg-slate-200 text-xs font-medium"
+                        class={cn(
+                          "px-2 py-1 rounded-xl border text-xs font-medium",
+                          item.color && `border-[${item.color}]`
+                        )}
+                        style={item.color ? { borderColor: item.color } : {}}
                       >
-                        {label}
+                        {item.label}
                       </div>
                     ))
                   : props.placeholder}
@@ -127,15 +132,26 @@ export default defineComponent({
                       onSelect={() => handleSetValue(option.value)}
                       value={option.value}
                     >
-                      <Check
-                        class={cn(
-                          "mr-2 h-4 w-4",
-                          selectedItems.value.includes(option.value)
-                            ? "opacity-100"
-                            : "opacity-0"
+                      <div class="flex items-center">
+                        {selectedItems.value.includes(option.value) ? (
+                          <Check
+                            class="mr-2 h-4 w-4"
+                            style={option.color ? { color: option.color } : {}}
+                          />
+                        ) : (
+                          <div class="mr-2 h-4 w-4 flex items-center justify-center">
+                            <div
+                              class="w-1 h-1 rounded-full"
+                              style={
+                                option.color
+                                  ? { backgroundColor: option.color }
+                                  : {}
+                              }
+                            />
+                          </div>
                         )}
-                      />
-                      {option.label}
+                        {option.label}
+                      </div>
                     </CommandItem>
                   ))}
                 </CommandList>

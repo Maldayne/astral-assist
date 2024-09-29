@@ -31,6 +31,7 @@ export default defineComponent({
       props.currentGroupAssistants.map((assistant) => ({
         value: assistant.id,
         label: assistant.name,
+        color: assistant.backgroundColor,
       }))
     )
 
@@ -72,7 +73,6 @@ export default defineComponent({
             }
             placeholder="Select assistants"
             class="w-full"
-            defaultValue={assistantOptions.value.map((option) => option.value)}
           />
         </div>
 
