@@ -14,7 +14,7 @@ export default defineComponent({
     },
     opacity: {
       type: Number as PropType<number>,
-      default: 0.3,
+      default: 0.2,
     },
     className: {
       type: String as PropType<string>,
@@ -23,7 +23,7 @@ export default defineComponent({
   },
   setup(props) {
     const gradientStyle = computed(() => ({
-      background: `linear-gradient(${props.direction}, ${props.color}, transparent 80%)`,
+      background: `linear-gradient(${props.direction}, ${props.color}, transparent)`,
       opacity: props.opacity,
     }))
 

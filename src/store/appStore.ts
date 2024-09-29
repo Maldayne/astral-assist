@@ -25,35 +25,35 @@ export const useAppStore = defineStore("app", () => {
           name: "Alpha",
           avatar: "/path/to/avatar1.png",
           type: "query",
-          backgroundColor: "blue",
+          color: "blue",
         },
         {
           id: "2",
           name: "Bravo",
           avatar: "/path/to/avatar2.png",
           type: "command",
-          backgroundColor: "green",
+          color: "green",
         },
         {
           id: "3",
           name: "Charlie",
           avatar: "/path/to/avatar3.png",
           type: "query",
-          backgroundColor: "yellow",
+          color: "yellow",
         },
         {
           id: "4",
           name: "Delta",
           avatar: "/path/to/avatar4.png",
           type: "command",
-          backgroundColor: "red",
+          color: "red",
         },
         {
           id: "5",
           name: "Echo",
           avatar: "/path/to/avatar5.png",
           type: "query",
-          backgroundColor: "orange",
+          color: "orange",
         },
       ],
     },
@@ -65,7 +65,7 @@ export const useAppStore = defineStore("app", () => {
       name: "Solo Assistant",
       avatar: "/path/to/avatar9.png",
       type: "command",
-      backgroundColor: "#E6FFE6",
+      color: "#E6FFE6",
     },
   ])
 
@@ -188,7 +188,7 @@ export const useAppStore = defineStore("app", () => {
         name: assistant.name || "New Assistant",
         avatar: assistant.avatar || null,
         type: assistant.type || "query",
-        backgroundColor: assistant.backgroundColor || DEFAULT_ASSISTANT_COLOR,
+        color: assistant.color || DEFAULT_ASSISTANT_COLOR,
       })
     }
   }
@@ -199,7 +199,7 @@ export const useAppStore = defineStore("app", () => {
       name: assistant.name || "New Assistant",
       avatar: assistant.avatar || null,
       type: assistant.type || "query",
-      backgroundColor: assistant.backgroundColor || DEFAULT_ASSISTANT_COLOR,
+      color: assistant.color || DEFAULT_ASSISTANT_COLOR,
     })
   }
 

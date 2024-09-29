@@ -54,7 +54,7 @@ export default defineComponent({
           name: newAssistantName.value.trim(),
           avatar: "/placeholder-avatar.png",
           type: newAssistantType.value,
-          backgroundColor: newAssistantType.value,
+          color: newAssistantType.value,
         })
         newAssistantName.value = ""
         newAssistantType.value = "query"

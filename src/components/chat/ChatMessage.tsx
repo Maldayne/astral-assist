@@ -40,23 +40,30 @@ export default defineComponent({
       >
         <div
           class={cn(
-            "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 whitespace-pre-wrap",
+            "max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl rounded-lg p-3 relative",
             props.role === "user"
-              ? "bg-blue-500 text-white"
-              : props.role === "assistant"
-                ? "text-gray-900 dark:text-white"
-                : "bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100"
+              ? "bg-blue-100 dark:bg-blue-900"
+              : "bg-gray-100 dark:bg-gray-800",
+            props.role === "error" &&
+              "bg-red-100 dark:bg-red-900 text-red-900 dark:text-red-100"
           )}
-          style={
-            props.role === "assistant"
-              ? { backgroundColor: props.backgroundColor }
-              : {}
-          }
         >
           {props.role === "assistant" && (
-            <div class="text-sm font-semibold mb-1">{props.assistantName}</div>
+            <div
+              class="absolute left-0 top-0 bottom-0 w-1 rounded-l-lg"
+              style={{ backgroundColor: props.backgroundColor }}
+            ></div>
           )}
-          {formatContent(props.content)}
+          <div class="pl-2">
+            {" "}
+            {/* Add left padding to account for the color bar */}
+            {props.role === "assistant" && (
+              <div class="text-sm font-semibold mb-1">
+                {props.assistantName}
+              </div>
+            )}
+            {formatContent(props.content)}
+          </div>
         </div>
       </div>
     )

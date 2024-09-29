@@ -36,7 +36,7 @@ export default defineComponent({
           onEnter={sendMessage}
           class={`border-2 ${
             props.currentAssistant
-              ? `border-[${props.currentAssistant.backgroundColor}]`
+              ? `border-[${props.currentAssistant.color}]`
               : "border-gray-300"
           }`}
         />

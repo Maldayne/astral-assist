@@ -8,7 +8,7 @@ export default defineComponent({
       type: String as PropType<string>,
       default: "",
     },
-    backgroundColor: {
+    color: {
       type: String as PropType<string>,
       default: "",
     },
@@ -18,7 +18,7 @@ export default defineComponent({
       <div
         class={cn("p-6", props.class)}
         style={{
-          backgroundColor: props.backgroundColor,
+          backgroundColor: props.color,
           borderRadius: "inherit",
         }}
       >

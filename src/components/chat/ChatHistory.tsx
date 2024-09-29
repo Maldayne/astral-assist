@@ -31,7 +31,7 @@ export default defineComponent({
       props.currentGroupAssistants.map((assistant) => ({
         value: assistant.id,
         label: assistant.name,
-        color: assistant.backgroundColor,
+        color: assistant.color,
       }))
     )
 
@@ -57,8 +57,8 @@ export default defineComponent({
 
     const getAssistantColor = (assistantId: string) => {
       return (
-        props.currentGroupAssistants.find((a) => a.id === assistantId)
-          ?.backgroundColor || ""
+        props.currentGroupAssistants.find((a) => a.id === assistantId)?.color ||
+        ""
       )
     }
 
