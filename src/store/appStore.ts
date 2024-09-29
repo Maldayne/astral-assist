@@ -1,21 +1,24 @@
 import { aiService } from "@/modules/query/aiService"
 import { STTFactory, STTProviderType } from "@/services/stt/STTFactory"
 import { STTProvider } from "@/services/stt/STTProvider"
-import { Assistant, AssistantGroup } from "@/types/assistant"
+import { AssistantProfileType, AssistantType } from "@/types/assistant"
 import { defineStore } from "pinia"
 import { computed, ref, shallowRef } from "vue"
 
 interface ChatMessage {
+  id: string
+  assistantId: string
   role: "user" | "assistant" | "error" | "system"
   content: string
+  timestamp: number
 }
 
 export const useAppStore = defineStore("app", () => {
-  // Assistant and Group Management
-  const assistantGroups = ref<AssistantGroup[]>([
+  // Assistant and Profile Management
+  const assistantProfiles = ref<AssistantProfileType[]>([
     {
       id: "1",
-      name: "Default Group",
+      name: "Default Profile",
       assistants: [
         {
           id: "1",
@@ -56,7 +59,7 @@ export const useAppStore = defineStore("app", () => {
     },
   ])
 
-  const individualAssistants = ref<Assistant[]>([
+  const individualAssistants = ref<AssistantType[]>([
     {
       id: "9",
       name: "Solo Assistant",
@@ -66,21 +69,28 @@ export const useAppStore = defineStore("app", () => {
     },
   ])
 
-  const activeGroupId = ref<string | null>(assistantGroups.value[0].id)
+  const activeAssistantProfileId = ref<string | null>(
+    assistantProfiles.value[0].id
+  )
   const activeAssistantId = ref<string>(
-    assistantGroups.value[0].assistants[0].id
+    assistantProfiles.value[0].assistants[0].id
   )
 
-  const allAssistants = computed((): Assistant[] => {
+  const allAssistants = computed((): AssistantType[] => {
     return [
-      ...assistantGroups.value.flatMap((group) => group.assistants),
+      ...assistantProfiles.value.flatMap(
+        (assistantProfile) => assistantProfile.assistants
+      ),
       ...individualAssistants.value,
     ]
   })
 
-  const activeGroup = computed(() =>
-    activeGroupId.value
-      ? assistantGroups.value.find((group) => group.id === activeGroupId.value)
+  const activeAssistantProfile = computed(() =>
+    activeAssistantProfileId.value
+      ? assistantProfiles.value.find(
+          (assistantProfile) =>
+            assistantProfile.id === activeAssistantProfileId.value
+        )
       : null
   )
 
@@ -90,29 +100,29 @@ export const useAppStore = defineStore("app", () => {
     )
   )
 
-  const currentAssistants = computed((): Assistant[] => {
-    if (activeGroupId.value) {
-      return activeGroup.value?.assistants || []
+  const currentAssistants = computed((): AssistantType[] => {
+    if (activeAssistantProfileId.value) {
+      return activeAssistantProfile.value?.assistants || []
     } else {
       return individualAssistants.value
     }
   })
 
   // Chat Management
-  const chatMessages = ref<Record<string, ChatMessage[]>>({})
-  const selectedAssistantFilter = ref<string | null>(null)
+  const chatMessages = ref<ChatMessage[]>([])
+  const selectedAssistantFilter = ref<string[]>(["all"])
   const isLoading = ref(false)
 
   const filteredChatMessages = computed(() => {
-    if (selectedAssistantFilter.value === null) {
+    if (
+      selectedAssistantFilter.value.includes("all") ||
+      selectedAssistantFilter.value.length === 0
+    ) {
       return chatMessages.value
     }
-    const filteredMessages: Record<string, ChatMessage[]> = {}
-    if (selectedAssistantFilter.value in chatMessages.value) {
-      filteredMessages[selectedAssistantFilter.value] =
-        chatMessages.value[selectedAssistantFilter.value]
-    }
-    return filteredMessages
+    return chatMessages.value.filter((message) =>
+      selectedAssistantFilter.value.includes(message.assistantId)
+    )
   })
 
   // STT Management
@@ -128,15 +138,15 @@ export const useAppStore = defineStore("app", () => {
   let sttProvider: STTProvider | null = null
 
   // Functions
-  function setActiveAssistantOrGroup(id: string) {
-    const group = assistantGroups.value.find((g) => g.id === id)
-    if (group) {
-      activeGroupId.value = id
-      activeAssistantId.value = group.assistants[0].id
+  function setActiveAssistantOrProfile(id: string) {
+    const profile = assistantProfiles.value.find((g) => g.id === id)
+    if (profile) {
+      activeAssistantProfileId.value = id
+      activeAssistantId.value = profile.assistants[0].id
     } else {
       const assistant = individualAssistants.value.find((a) => a.id === id)
       if (assistant) {
-        activeGroupId.value = null
+        activeAssistantProfileId.value = null
         activeAssistantId.value = id
       }
     }
@@ -146,18 +156,19 @@ export const useAppStore = defineStore("app", () => {
     const assistant = allAssistants.value.find((a) => a.id === assistantId)
     if (assistant) {
       activeAssistantId.value = assistantId
-      const group = assistantGroups.value.find((g) =>
+      const profile = assistantProfiles.value.find((g) =>
         g.assistants.includes(assistant)
       )
-      activeGroupId.value = group ? group.id : null
+      activeAssistantProfileId.value = profile ? profile.id : null
     }
   }
 
-  function addAssistantGroup(name: string) {
+  function addAssistantProfile(name: string) {
     const newId = (
-      parseInt(assistantGroups.value[assistantGroups.value.length - 1].id) + 1
+      parseInt(assistantProfiles.value[assistantProfiles.value.length - 1].id) +
+      1
     ).toString()
-    assistantGroups.value.push({
+    assistantProfiles.value.push({
       id: newId,
       name,
       assistants: [],
@@ -166,10 +177,13 @@ export const useAppStore = defineStore("app", () => {
 
   const DEFAULT_ASSISTANT_COLOR = "#E8EEF4"
 
-  function addAssistantToGroup(groupId: string, assistant: Partial<Assistant>) {
-    const group = assistantGroups.value.find((g) => g.id === groupId)
-    if (group) {
-      group.assistants.push({
+  function addAssistantToProfile(
+    profileId: string,
+    assistant: Partial<AssistantType>
+  ) {
+    const profile = assistantProfiles.value.find((g) => g.id === profileId)
+    if (profile) {
+      profile.assistants.push({
         id: Date.now().toString(),
         name: assistant.name || "New Assistant",
         avatar: assistant.avatar || null,
@@ -179,7 +193,7 @@ export const useAppStore = defineStore("app", () => {
     }
   }
 
-  function addIndividualAssistant(assistant: Partial<Assistant>) {
+  function addIndividualAssistant(assistant: Partial<AssistantType>) {
     individualAssistants.value.push({
       id: Date.now().toString(),
       name: assistant.name || "New Assistant",
@@ -193,27 +207,28 @@ export const useAppStore = defineStore("app", () => {
     assistantId: string,
     avatarUrl: string | null
   ) {
-    const updateAssistant = (assistant: Assistant) => {
+    const updateAssistant = (assistant: AssistantType) => {
       if (assistant.id === assistantId) {
         assistant.avatar = avatarUrl
       }
     }
 
-    assistantGroups.value.forEach((group) =>
-      group.assistants.forEach(updateAssistant)
+    assistantProfiles.value.forEach((assistantProfile) =>
+      assistantProfile.assistants.forEach(updateAssistant)
     )
     individualAssistants.value.forEach(updateAssistant)
   }
 
-  function addMessage(assistantId: string, message: ChatMessage) {
-    if (!chatMessages.value[assistantId]) {
-      chatMessages.value[assistantId] = []
-    }
-    chatMessages.value[assistantId].push(message)
+  function addMessage(message: Omit<ChatMessage, "id" | "timestamp">) {
+    chatMessages.value.push({
+      ...message,
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+    })
   }
 
-  function setAssistantFilter(assistantId: string | null) {
-    selectedAssistantFilter.value = assistantId
+  function setAssistantFilter(assistantIds: string[]) {
+    selectedAssistantFilter.value = assistantIds
   }
 
   async function sendMessage(message: string) {
@@ -221,23 +236,22 @@ export const useAppStore = defineStore("app", () => {
       return
 
     const assistantId = activeAssistant.value.id
-    addMessage(assistantId, { role: "user", content: message })
+    addMessage({ assistantId, role: "user", content: message })
     isLoading.value = true
 
     try {
       let response: string
-      console.log(`Sending message to ${activeAssistant.value.name}`)
       if (activeAssistant.value.type === "query") {
         const systemPrompt = `You are a helpful AI assistant named ${activeAssistant.value.name}.`
-        console.log(`System prompt: ${systemPrompt}`)
         response = await aiService.queryClaude(message, systemPrompt)
       } else {
         response = `I'm ${activeAssistant.value.name}, a command assistant, and I'm not fully implemented yet.`
       }
-      addMessage(assistantId, { role: "assistant", content: response })
+      addMessage({ assistantId, role: "assistant", content: response })
     } catch (error) {
       console.error("Error querying AI:", error)
-      addMessage(assistantId, {
+      addMessage({
+        assistantId,
         role: "error",
         content: "An error occurred. Please try again later.",
       })
@@ -313,7 +327,7 @@ export const useAppStore = defineStore("app", () => {
     )
   }
 
-  function findAssistantByName(name: string): Assistant | undefined {
+  function findAssistantByName(name: string): AssistantType | undefined {
     return allAssistants.value.find(
       (assistant) => assistant.name.toLowerCase() === name.toLowerCase()
     )
@@ -339,19 +353,19 @@ export const useAppStore = defineStore("app", () => {
   updateDarkMode(isDarkMode.value)
 
   return {
-    // Assistant and Group Management
-    assistantGroups,
+    // Assistant and Profile Management
+    assistantProfiles,
     individualAssistants,
-    activeGroupId,
+    activeAssistantProfileId,
     activeAssistantId,
     allAssistants,
-    activeGroup,
+    activeAssistantProfile,
     activeAssistant,
     currentAssistants,
-    setActiveAssistantOrGroup,
+    setActiveAssistantOrProfile,
     setActiveAssistant,
-    addAssistantGroup,
-    addAssistantToGroup,
+    addAssistantProfile,
+    addAssistantToProfile,
     addIndividualAssistant,
     updateAssistantAvatar,
 

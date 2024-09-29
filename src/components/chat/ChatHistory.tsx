@@ -1,39 +1,90 @@
-import { defineComponent, PropType } from "vue"
+import MultiSelectItem from "@/components/ui/MultiSelectItem"
+import { AssistantType, ChatMessageType } from "@/types/assistant"
+import { computed, defineComponent, PropType } from "vue"
 import ChatMessage from "./ChatMessage"
-
-interface ChatMessage {
-  role: "user" | "assistant" | "error" | "system"
-  content: string
-}
 
 export default defineComponent({
   name: "ChatHistory",
   props: {
     messages: {
-      type: Array as PropType<ChatMessage[]>,
+      type: Array as PropType<ChatMessageType[]>,
       required: true,
     },
-    assistantBackgroundColor: {
-      type: String,
+    currentGroupAssistants: {
+      type: Array as PropType<AssistantType[]>,
+      required: true,
+    },
+    selectedAssistantFilter: {
+      type: Array as PropType<string[]>,
+      required: true,
+    },
+    isLoading: {
+      type: Boolean,
       required: true,
     },
   },
-  setup(props) {
+  emits: ["updateFilter"],
+  setup(props, { emit }) {
+    const assistantOptions = computed(() => [
+      { value: "all", label: "All Assistants" },
+      ...props.currentGroupAssistants.map((assistant) => ({
+        value: assistant.id,
+        label: assistant.name,
+      })),
+    ])
+
+    const filteredMessages = computed(() => {
+      if (
+        props.selectedAssistantFilter.includes("all") ||
+        props.selectedAssistantFilter.length === 0
+      ) {
+        return props.messages
+      }
+      return props.messages.filter((message) =>
+        props.selectedAssistantFilter.includes(message.assistantId)
+      )
+    })
+
+    const getAssistantName = (assistantId: string) => {
+      return (
+        props.currentGroupAssistants.find((a) => a.id === assistantId)?.name ||
+        "Unknown"
+      )
+    }
+
+    const getAssistantColor = (assistantId: string) => {
+      return (
+        props.currentGroupAssistants.find((a) => a.id === assistantId)
+          ?.backgroundColor || ""
+      )
+    }
+
     return () => (
       <div class="flex-1 overflow-y-auto py-4 w-full">
+        <div class="mb-4">
+          <MultiSelectItem
+            modelValue={props.selectedAssistantFilter}
+            options={assistantOptions.value}
+            placeholder="Select assistants"
+            onUpdate:modelValue={(value) => emit("updateFilter", value)}
+          />
+        </div>
+
         <div class="space-y-4">
-          {props.messages.map((message, index) => (
+          {filteredMessages.value.map((message) => (
             <ChatMessage
-              key={index}
+              key={message.id}
               role={message.role}
               content={message.content}
-              backgroundColor={
-                message.role === "assistant"
-                  ? props.assistantBackgroundColor
-                  : ""
-              }
+              assistantName={getAssistantName(message.assistantId)}
+              backgroundColor={getAssistantColor(message.assistantId)}
             />
           ))}
+          {props.isLoading && (
+            <div class="text-center">
+              <span class="loading loading-dots loading-md"></span>
+            </div>
+          )}
         </div>
       </div>
     )

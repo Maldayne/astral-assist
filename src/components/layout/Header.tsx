@@ -2,7 +2,7 @@ import ButtonItem from "@/components/ui/ButtonItem"
 import { useAppStore } from "@/store/appStore"
 import { Menu, Mic, MicOff } from "lucide-vue-next"
 import { computed, defineComponent, PropType, ref } from "vue"
-import AssistantGroupSelector from "../assistant-groups/AssistantGroupSelector"
+import AssistantProfileSelector from "../assistant-profile/AssistantProfileSelector"
 import TranscriptDisplay from "../chat/TranscriptDisplay"
 
 export default defineComponent({
@@ -18,7 +18,7 @@ export default defineComponent({
     const searchQuery = ref("")
 
     const filteredGroups = computed(() => {
-      return appStore.assistantGroups.filter((group) =>
+      return appStore.assistantProfiles.filter((group) =>
         group.name.toLowerCase().includes(searchQuery.value.toLowerCase())
       )
     })
@@ -39,7 +39,7 @@ export default defineComponent({
               >
                 <Menu class="h-6 w-6" />
               </ButtonItem>
-              <AssistantGroupSelector
+              <AssistantProfileSelector
                 groups={filteredGroups.value}
                 searchQuery={searchQuery.value}
                 onUpdateSearch={(query: string) => (searchQuery.value = query)}

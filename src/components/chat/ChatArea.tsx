@@ -1,5 +1,5 @@
 import { useAppStore } from "@/store/appStore"
-import { computed, defineComponent, watch } from "vue"
+import { computed, defineComponent } from "vue"
 import ChatHistory from "./ChatHistory"
 import ChatInput from "./ChatInput"
 
@@ -8,43 +8,31 @@ export default defineComponent({
   setup() {
     const appStore = useAppStore()
 
-    const currentChatMessages = computed(() => {
-      if (
-        appStore.activeAssistant &&
-        typeof appStore.activeAssistant.id === "string"
-      ) {
-        return appStore.chatMessages[appStore.activeAssistant.id] || []
-      }
-      return []
-    })
+    const currentAssistant = computed(() => appStore.activeAssistant)
 
-    const assistantBackgroundColor = computed(() => {
-      return appStore.activeAssistant?.backgroundColor || ""
-    })
+    const currentGroupAssistants = computed(() =>
+      appStore.activeAssistantProfile
+        ? appStore.activeAssistantProfile.assistants
+        : []
+    )
 
     const sendMessage = (message: string) => {
-      console.log("ChatArea - sendMessage:", message)
       appStore.sendMessage(message)
     }
-
-    watch(
-      () => appStore.activeAssistantId,
-      () => {
-        console.log("Active assistant changed, updating chat history")
-      }
-    )
 
     return () => (
       <div class="flex flex-col h-full">
         <ChatHistory
-          messages={currentChatMessages.value}
-          assistantBackgroundColor={assistantBackgroundColor.value}
+          messages={appStore.filteredChatMessages}
+          currentGroupAssistants={currentGroupAssistants.value}
+          selectedAssistantFilter={appStore.selectedAssistantFilter}
+          onUpdateFilter={appStore.setAssistantFilter}
           isLoading={appStore.isLoading}
         />
         <ChatInput
           onSendMessage={sendMessage}
           disabled={appStore.isLoading}
-          currentAssistant={appStore.activeAssistant}
+          currentAssistant={currentAssistant.value}
         />
       </div>
     )

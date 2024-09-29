@@ -1,4 +1,4 @@
-export interface Assistant {
+export interface AssistantType {
   id: string
   name: string
   avatar: string | null
@@ -6,12 +6,22 @@ export interface Assistant {
   backgroundColor: string
 }
 
-export interface AssistantCardProps extends Assistant {
+export interface AssistantCardPropsType extends AssistantType {
   isActive: boolean
 }
 
-export interface AssistantGroup {
+export interface AssistantProfileType {
   id: string
   name: string
-  assistants: Assistant[]
+  assistants: AssistantType[]
 }
+
+export interface ChatMessageType {
+  id: string
+  assistantId: string
+  role: "user" | "assistant" | "error" | "system"
+  content: string
+  timestamp: number
+}
+
+export type AssistantFilterValueType = string | null

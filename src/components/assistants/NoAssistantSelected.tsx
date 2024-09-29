@@ -1,11 +1,11 @@
-import { Assistant } from "@/types/assistant"
+import { AssistantType } from "@/types/assistant"
 import { defineComponent, PropType } from "vue"
 
 export default defineComponent({
   name: "AssistantHeader",
   props: {
     assistant: {
-      type: Object as PropType<Assistant>,
+      type: Object as PropType<AssistantType>,
       required: true,
     },
   },

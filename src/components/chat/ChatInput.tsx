@@ -1,9 +1,8 @@
 import ButtonItem from "@/components/ui/ButtonItem"
 import TextareaItem from "@/components/ui/TextareaItem"
-import { useAppStore } from "@/store/appStore"
-import { Assistant } from "@/types/assistant"
+import { AssistantType } from "@/types/assistant"
 import { Send } from "lucide-vue-next"
-import { defineComponent, onUnmounted, PropType, ref, watch } from "vue"
+import { defineComponent, PropType, ref } from "vue"
 
 export default defineComponent({
   name: "ChatInput",
@@ -13,15 +12,13 @@ export default defineComponent({
       default: false,
     },
     currentAssistant: {
-      type: Object as PropType<Assistant | null>,
+      type: Object as PropType<AssistantType | null>,
       default: null,
     },
   },
   emits: ["sendMessage"],
   setup(props, { emit }) {
-    const appStore = useAppStore()
     const inputMessage = ref("")
-    let silenceTimer: ReturnType<typeof setTimeout> | null = null
 
     const sendMessage = () => {
       if (inputMessage.value.trim()) {
@@ -30,35 +27,6 @@ export default defineComponent({
       }
     }
 
-    watch(
-      () => appStore.transcribedWords,
-      (newWords) => {
-        if (appStore.isContinuousListening && props.currentAssistant) {
-          inputMessage.value = newWords.join(" ")
-
-          if (silenceTimer) {
-            clearTimeout(silenceTimer)
-          }
-
-          silenceTimer = setTimeout(() => {
-            if (
-              !appStore.killSwitchWords.some((word) =>
-                inputMessage.value.toLowerCase().includes(word)
-              )
-            ) {
-              sendMessage()
-            }
-          }, appStore.silenceDuration)
-        }
-      }
-    )
-
-    onUnmounted(() => {
-      if (silenceTimer) {
-        clearTimeout(silenceTimer)
-      }
-    })
-
     return () => (
       <div class="flex items-center space-x-2 p-4">
         <TextareaItem
@@ -66,6 +34,11 @@ export default defineComponent({
           placeholder={`Type your message to ${props.currentAssistant?.name || "the assistant"}...`}
           disabled={props.disabled}
           onEnter={sendMessage}
+          class={`border-2 ${
+            props.currentAssistant
+              ? `border-[${props.currentAssistant.backgroundColor}]`
+              : "border-gray-300"
+          }`}
         />
         <ButtonItem
           onClick={sendMessage}

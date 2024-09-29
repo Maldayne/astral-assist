@@ -38,14 +38,14 @@ export default defineComponent({
 
     const addNewGroup = () => {
       if (newGroupName.value.trim()) {
-        appStore.addAssistantGroup(newGroupName.value.trim())
+        appStore.addAssistantProfile(newGroupName.value.trim())
         newGroupName.value = ""
       }
     }
 
     const addNewAssistant = () => {
-      if (newAssistantName.value.trim() && appStore.activeGroup) {
-        appStore.addAssistantToGroup(appStore.activeGroup.id, {
+      if (newAssistantName.value.trim() && appStore.activeAssistantProfile) {
+        appStore.addAssistantToProfile(appStore.activeAssistantProfile.id, {
           id: Date.now().toString(),
           name: newAssistantName.value.trim(),
           avatar: "/placeholder-avatar.png",
@@ -137,9 +137,9 @@ export default defineComponent({
               <section aria-label="Speech-to-Text settings">
                 <h2 class="text-lg font-semibold mb-2">Speech-to-Text</h2>
                 <SelectItem
-                  modelValue={appStore.sttPreference}
-                  onUpdate:modelValue={(value: STTProviderType) =>
-                    appStore.setSttPreference(value)
+                  modelValue={[appStore.sttPreference]}
+                  onUpdate:modelValue={(value: string[]) =>
+                    appStore.setSttPreference(value[0] as STTProviderType)
                   }
                   options={sttOptions}
                   placeholder="Select STT provider"

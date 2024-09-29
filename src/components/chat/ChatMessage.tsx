@@ -16,6 +16,10 @@ export default defineComponent({
       type: String,
       default: "",
     },
+    assistantName: {
+      type: String,
+      default: "",
+    },
   },
   setup(props) {
     const formatContent = (content: string) => {
@@ -49,6 +53,9 @@ export default defineComponent({
               : {}
           }
         >
+          {props.role === "assistant" && (
+            <div class="text-sm font-semibold mb-1">{props.assistantName}</div>
+          )}
           {formatContent(props.content)}
         </div>
       </div>
